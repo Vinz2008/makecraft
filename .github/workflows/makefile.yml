@@ -1,0 +1,21 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+      
+    - name: Compile
+      run: make RAYLIB_PATH=C:/raylib/raylib  PLATFORM=PLATFORM_DESKTOP BUILD_MODE=DEBUG PROJECT_NAME=makecraft OBJS=main.c
+
