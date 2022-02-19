@@ -1,21 +1,11 @@
 /*******************************************************************************************
 *
-*   raylib [core] example - Basic 3d example
-*
-*   Welcome to raylib!
-*
 *   To compile example, just press F5.
 *   Note that compiled executable is placed in the same folder as .c file
 *
 *   You can find all basic examples on C:\raylib\raylib\examples folder or
 *   raylib official webpage: www.raylib.com
-*
-*   Enjoy using raylib. :)
-*
-*   This example has been created using raylib 1.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2013-2022 Ramon Santamaria (@raysan5)
+
 *
 ********************************************************************************************/
 
@@ -63,7 +53,7 @@ int main()
     camera.projection = CAMERA_PERSPECTIVE;
     PlayerPosition = (Vector3){camera.position.x , camera.position.y, camera.position.z};
     PlayerPositionFloor = (Vector3){camera.position.x , camera.position.y - PLAYER_HEIGHT, camera.position.z};
-    PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition, PlayerHitBox};
+    PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     Image DirtTextureMap = LoadImage("textures/dirt.png");
     Texture2D DirtTexture = LoadTextureFromImage(DirtTextureMap);
@@ -92,6 +82,8 @@ int main()
             DrawCube((Vector3){cubePosition.x + (float)i, cubePosition.y, cubePosition.z + (float)i2}, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires((Vector3){cubePosition.x + (float)i, cubePosition.y, cubePosition.z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
             DrawCubeTexture(DirtTexture, (Vector3){cubePosition.x + (float)i, cubePosition.y, cubePosition.z + (float)i2},2.0f,2.0f,2.0f ,WHITE);
+            DrawBoundingBox(PlayerHitBox, BLACK);
+            DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
             }
             }
             /*for (i = 3; i < 27; i = i + 3) {
@@ -101,6 +93,7 @@ int main()
             DrawGrid(10, 1.0f);
 
         EndMode3D();
+        camera.position.y -= 1;
 
         DrawFPS(10, 10);
         
@@ -113,13 +106,15 @@ int main()
     };*/
     PlayerPosition = (Vector3){camera.position.x , camera.position.y, camera.position.z};
     PlayerPositionFloor = (Vector3){camera.position.x , camera.position.y - 10.0f, camera.position.z};
-    PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition, PlayerHitBox};
+    PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     }
 #endif
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    UnloadImage(DirtTextureMap);
+    UnloadTexture(DirtTexture);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
