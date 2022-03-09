@@ -89,11 +89,16 @@ int main()
             /*for (i = 3; i < 27; i = i + 3) {
             DrawCube((Vector3){cubePosition.x + (float)i2, cubePosition.y, cubePosition.z  + (float)i}, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires((Vector3){cubePosition.x + (float)i2, cubePosition.y, cubePosition.z  + (float)i}, 2.0f, 2.0f, 2.0f, BLACK); 
-            }*/
+            }
+            BoundingBox cubeBox = {cubePosition, (Vector3){cubePosition.x + 1.0f, cubePosition.y + 1.0f, cubePosition.z + 1.0f}};
+            Ray rayPointerPlayer = {PlayerPosition, (Vector3){camera.position.x, 1.0f, camera.position.z}};
             DrawGrid(10, 1.0f);
+            DrawRay(rayPointerPlayer, WHITE);
+            GetRayCollisionBox(rayPointerPlayer,cubeBox);
+            */
 
         EndMode3D();
-        camera.position.y -= 1;
+        //camera.position.y -= 1;
 
         DrawFPS(10, 10);
         
