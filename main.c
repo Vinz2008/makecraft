@@ -59,6 +59,8 @@ int main()
     Texture2D DirtTexture = LoadTextureFromImage(DirtTextureMap);
     
     SetCameraMode(camera, CAMERA_FIRST_PERSON);
+    SetConfigFlags(FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
 
     //--------------------------------------------------------------------------------------
 
@@ -70,7 +72,10 @@ int main()
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
+    {  
+        if (IsKeyPressed(KEY_SPACE)){
+        camera.position.y += 1.0f;
+        }
         UpdateCamera(&camera);
         BeginDrawing();
         ClearBackground(RAYWHITE);
