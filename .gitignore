@@ -1,3 +1,6 @@
 *.exe
+*.o
 main.exe
 main
+makecraft
+libnoise.a
