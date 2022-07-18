@@ -413,3 +413,6 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
 endif
 	@echo Cleaning done
 
+raylib:
+	make -f raylib.mk raylib
+
