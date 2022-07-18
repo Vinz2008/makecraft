@@ -82,6 +82,13 @@ __int16_t PerlinNoise2D( float x, float y, float amp, __int32_t octaves, __int32
   return USHRT_MAX/2.f + amp*noise;
 }
 
+
+void createBlock(float x, float y, float z){
+    DrawCube((Vector3){x, y, z}, 2.0f, 2.0f, 2.0f, RED);
+    DrawCubeWires((Vector3){x, y, z}, 2.0f, 2.0f, 2.0f, BLACK);
+    DrawCubeTexture(DirtTexture, (Vector3){x, y , z}, 2.0f, 2.0f, 2.0f, WHITE);
+}
+
 void createChunk(float x, float y, float z){
     int i;
     int i2;
