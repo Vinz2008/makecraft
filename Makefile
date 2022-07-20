@@ -349,6 +349,9 @@ endif
 
 
 LDLIBS += lib/noise/libnoise.a
+LDLIBS += lib/misc/misc.a
+LDLIBS += -llua -lm
+LDLIBS += lib/lua_api/liblua_api.a
 
 
 
@@ -377,6 +380,8 @@ endif
 # NOTE: We call this Makefile target or Makefile.Android target
 all: clean
 	$(MAKE) -C lib/noise/
+	$(MAKE) -C lib/misc/
+	$(MAKE) -C lib/lua_api/
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME
@@ -411,8 +416,12 @@ endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
 	del *.o *.html *.js
 endif
+	$(MAKE) -C lib/noise/ clean
+	$(MAKE) -C lib/lua_api/ clean
 	@echo Cleaning done
 
 raylib:
 	make -f raylib.mk raylib
 
+run:
+	./makecraft --script test.lua

@@ -11,14 +11,14 @@
                 "PLATFORM=PLATFORM_DESKTOP",
                 "BUILD_MODE=DEBUG",
                 "PROJECT_NAME=makecraft",
-                "OBJS=${fileBasenameNoExtension}.c"
+                //"OBJS=main.c lua.c"
             ],
             "windows": {
                 "command": "mingw32-make.exe",
                 "args": [
                     "RAYLIB_PATH=C:/raylib/raylib",
                     "PROJECT_NAME=makecraft",
-                    "OBJS=${fileBasenameNoExtension}.c",
+                    //"OBJS=${fileBasenameNoExtension}.c",
                     "BUILD_MODE=DEBUG"
                 ],
             },
@@ -26,7 +26,7 @@
                 "args": [
                     "RAYLIB_PATH=<path_to_raylib>/raylib",
                     "PROJECT_NAME=${fileBasenameNoExtension}",
-                    "OBJS=${fileBasenameNoExtension}.c",
+                    //"OBJS=${fileBasenameNoExtension}.c",
                     "BUILD_MODE=DEBUG"
                 ],
             },

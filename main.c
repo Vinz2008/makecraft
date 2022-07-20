@@ -10,11 +10,22 @@
 ********************************************************************************************/
 
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 #include "raylib.h"
 #include "raymath.h"
+#include "lib/misc/startswith.h"
+#include "lib/lua_api/lua_api.h"
 #include "lib/noise/noise1234.h"
 #define PLAYER_HEIGHT 5.0f
+#ifdef WIN32
+#include <io.h>
+#define F_OK 0
+#define access _access
+#else
+#include <unistd.h>
+#endif
+
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -58,7 +69,6 @@ Vector3* cubeArrayPos;
 
 float noise(int x, int y) {
     int n;
-
     n = x + y * 57;
     n = (n << 13) ^ n;
     return (1.0 - ( (n * ((n * n * 15731) + 789221) +  1376312589) & 0x7fffffff) / 1073741824.0);
@@ -72,8 +82,7 @@ float noise(int x, int y) {
 __int16_t PerlinNoise2D( float x, float y, float amp, __int32_t octaves, __int32_t px, __int32_t py )
 {
   float noise = 0.f;
-  for( int octave = 1; octave < octaves; octave *= 2 )
-  {
+  for(int octave = 1; octave < octaves; octave *= 2){
     // Add in fractions of faster varying noise at lower amplitudes 
     // for higher octaves. Assuming x is normalized, WHEN octave==px
     // you get full period. Higher frequencies will go out and also meet period.
@@ -113,8 +122,25 @@ void createChunk(float x, float y, float z){
 //----------------------------------------------------------------------------------
 // Main entry point
 //----------------------------------------------------------------------------------
-int main() 
-{
+int main(int argc, char* argv[]){
+    char* filename_lua = "script.lua";
+    printf("filename_lua : %s\n", filename_lua);
+    if (argc > 0){
+        for (int i = 0; i < argc; i++) {
+            printf("%d : %s\n",i,  argv[i]);
+            if (startswith("-s", argv[i]) == 1 || startswith("--script", argv[i]) == 1){
+                printf("found in %s\n", argv[i]);
+                printf("filename_lua = %s\n", argv[i+1]);
+                filename_lua = argv[i+1];
+                //i++; 
+            }
+        }
+    }
+    printf("filename_lua : %s\n", filename_lua);
+    if (access(filename_lua, F_OK) == 0){
+        printf("run file lua : %s\n", filename_lua);
+        runLuaFile(filename_lua);
+    }
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 1200;
@@ -136,7 +162,11 @@ int main()
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     Image DirtTextureMap = LoadImage("textures/dirt.png");
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
-    
+    Rectangle textBox = {10, 10,  screenWidth/10, screenHeight/5};
+    bool mouseOnText = false;
+    int framesCounter = 0;
+    int letterCount = 0;
+    //char filename_lua[10] = "\0";
     SetCameraMode(camera, CAMERA_FIRST_PERSON);
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -149,10 +179,48 @@ int main()
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     lastMousePos = GetMousePosition();
+    bool exitWindow = false;
+    bool showHUD = false;
+    SetExitKey(0);
+
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {  
+    while (!exitWindow){   // Detect window close button or ESC key  
         //UpdateCamera(&camera);
+        if (IsKeyPressed(KEY_V) || WindowShouldClose()) exitWindow = true;
+        if (IsKeyPressed(KEY_ESCAPE)){
+            showHUD = (showHUD == true) ? false : true;
+            printf("showHUD : %d\n", showHUD);
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
+        /*if (CheckCollisionPointRec(GetMousePosition(), textBox) && showHUD == true) mouseOnText = true;
+        else mouseOnText = false;
+        if (mouseOnText){
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+            int key = GetCharPressed();
+            while (key > 0)
+            {
+                // NOTE: Only allow keys in range [32..125]
+                if ((key >= 32) && (key <= 125) && (letterCount < 9))
+                {
+                    filename_lua[letterCount] = (char)key;
+                    filename_lua[letterCount+1] = '\0'; // Add null terminator at the end of the string.
+                    letterCount++;
+                }
+
+                key = GetCharPressed();  // Check next character in the queue
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE))
+            {
+                letterCount--;
+                if (letterCount < 0) letterCount = 0;
+                filename_lua[letterCount] = '\0';
+            }
+        }
+        else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+        if (mouseOnText) framesCounter++;
+        else framesCounter = 0;*/
         Vector2 mouseMovement = Vector2Subtract(GetMousePosition(), lastMousePos);
         rotation.x += (mouseMovement.x*-CAMERA_MOUSE_MOVE_SENSITIVITY);
         rotation.y += (mouseMovement.y*-CAMERA_MOUSE_MOVE_SENSITIVITY);
@@ -194,6 +262,18 @@ int main()
         camera.target.z = camera.position.z - transform.m14;
         BeginDrawing();
         ClearBackground(RAYWHITE);
+        if (showHUD == true){
+            DrawRectangleRec(textBox, LIGHTGRAY);
+            if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
+            else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
+            DrawText(filename_lua, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+            if (mouseOnText){
+                if (letterCount < 9){
+                    if (((framesCounter/20)%2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(filename_lua, 40), (int)textBox.y + 12, 40, MAROON);
+                }
+                else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+            }
+        }
 
         BeginMode3D(camera);
             DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY);
