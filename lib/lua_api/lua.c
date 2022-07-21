@@ -4,6 +4,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+
 FILE* fp;
 
 int lua_printTest(lua_State *L){
@@ -22,10 +23,13 @@ int lua_createChunk(lua_State *L){
 }
 
 int lua_createBlock(lua_State *L){
-    lua_Number x_block = luaL_checknumber(L, 1);
-    lua_Number y_block = luaL_checknumber(L, 2);
-    lua_Number z_block = luaL_checknumber(L, 3);
-    createBlock(x_block, y_block, z_block);
+    float x_block = (float)luaL_checknumber(L, 1);
+    float y_block = (float)luaL_checknumber(L, 2);
+    float z_block = (float)luaL_checknumber(L, 3);
+    printf("x_block float : %f\n", x_block);
+    printf("y_block float : %f\n", y_block);
+    printf("z_block float : %f\n", z_block);
+    createBlock((float)x_block, (float)y_block, (float)z_block);
     return 1;
 }
 

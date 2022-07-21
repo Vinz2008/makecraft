@@ -9,7 +9,9 @@
 *
 ********************************************************************************************/
 
+#include "makecraft.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include "raylib.h"
@@ -45,10 +47,32 @@ typedef struct {
 
 
 
+typedef struct {
+    float x;
+    float y;
+    float z;
+    int material;
+}Block;
+
+typedef struct {
+    Block* blockArray;
+    size_t used;
+    size_t size;
+}BlockArray;
+
+typedef struct {
+    Camera camera;
+}Player;
+
+Player player; 
+
+
+
+BlockArray blockArray;
+
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
-Camera camera = { 0 };
 Vector3 cubePosition = { 0.0f, 0.0f, 0.0f };
 Vector3 PlayerPosition = {0};
 Vector3 PlayerPositionFloor = { 0 };
@@ -75,10 +99,6 @@ float noise(int x, int y) {
 }
 
 
-
-
-
-
 __int16_t PerlinNoise2D( float x, float y, float amp, __int32_t octaves, __int32_t px, __int32_t py )
 {
   float noise = 0.f;
@@ -92,7 +112,26 @@ __int16_t PerlinNoise2D( float x, float y, float amp, __int32_t octaves, __int32
 }
 
 
+void initBlockArray(BlockArray* blockArray, size_t initalSize){
+    blockArray->blockArray = malloc(sizeof(Block) * initalSize);
+    blockArray->used = 0;
+    blockArray->size = initalSize;
+}
+
+void addToBlockArray(BlockArray* blockArray, Block block){
+     if (blockArray->used == blockArray->size){
+        blockArray->size *=2;
+        blockArray->blockArray = realloc(blockArray->blockArray, blockArray->size * sizeof(Block));
+    }
+    blockArray->blockArray[blockArray->used++] = block;
+}
+
 void createBlock(float x, float y, float z){
+    Block tempBlock;
+    tempBlock.x = x;
+    tempBlock.y = y;
+    tempBlock.z = z;
+    addToBlockArray(&blockArray, tempBlock);
     DrawCube((Vector3){x, y, z}, 2.0f, 2.0f, 2.0f, RED);
     DrawCubeWires((Vector3){x, y, z}, 2.0f, 2.0f, 2.0f, BLACK);
     DrawCubeTexture(DirtTexture, (Vector3){x, y , z}, 2.0f, 2.0f, 2.0f, WHITE);
@@ -107,9 +146,10 @@ void createChunk(float x, float y, float z){
             //printf("noise : %d\n", noise_gen);
             int temp = 1;
             //for (int temp = 1; temp < noise_gen/10000; temp++){
-            DrawCube((Vector3){x + (float)i , y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, RED);
+            /*DrawCube((Vector3){x + (float)i , y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires((Vector3){x + (float)i, y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
-            DrawCubeTexture(DirtTexture, (Vector3){x + (float)i, y * temp, z + (float)i2},2.0f,2.0f,2.0f ,WHITE);
+            DrawCubeTexture(DirtTexture, (Vector3){x + (float)i, y * temp, z + (float)i2},2.0f,2.0f,2.0f ,WHITE);*/
+            createBlock(x + (float)i, y * temp, z + (float)i2);
             DrawBoundingBox(PlayerHitBox, BLACK);
             DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
             //}        
@@ -119,10 +159,30 @@ void createChunk(float x, float y, float z){
 
 
 
+bool isPlayerInCollisionWithBlock(Player player, Block block){
+    if (player.camera.position.x == block.x && player.camera.position.y == block.y){
+        return true;
+    }
+    return false;
+}
+
+
+bool isPlayerInCollisionWithABlock(Player player, BlockArray blockArray){
+    for (int i = 0; i < blockArray.used; i++) {
+        if (isPlayerInCollisionWithBlock(player, blockArray.blockArray[i])){
+            return true;
+        }
+    }
+    return false;
+}
+
+
 //----------------------------------------------------------------------------------
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
+    player.camera.fovy= 0;
+    initBlockArray(&blockArray, 100);
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
     if (argc > 0){
@@ -151,13 +211,13 @@ int main(int argc, char* argv[]){
 
     InitWindow(screenWidth, screenHeight, "raylib");
     
-    camera.position = (Vector3){ 10.0f, PLAYER_HEIGHT + 10.0f, 8.0f };
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 60.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
-    PlayerPosition = (Vector3){camera.position.x , camera.position.y, camera.position.z};
-    PlayerPositionFloor = (Vector3){camera.position.x , camera.position.y - PLAYER_HEIGHT, camera.position.z};
+    player.camera.position = (Vector3){ 10.0f, PLAYER_HEIGHT + 10.0f, 8.0f };
+    player.camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
+    player.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    player.camera.fovy = 60.0f;
+    player.camera.projection = CAMERA_PERSPECTIVE;
+    PlayerPosition = (Vector3){player.camera.position.x , player.camera.position.y, player.camera.position.z};
+    PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - PLAYER_HEIGHT, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     Image DirtTextureMap = LoadImage("textures/dirt.png");
@@ -167,7 +227,7 @@ int main(int argc, char* argv[]){
     int framesCounter = 0;
     int letterCount = 0;
     //char filename_lua[10] = "\0";
-    SetCameraMode(camera, CAMERA_FIRST_PERSON);
+    SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
 
@@ -245,11 +305,11 @@ int main(int argc, char* argv[]){
         if (IsKeyDown(KEY_SPACE))
             movement.y += 0.12f;
 
-        camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
+        player.camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
 
-        camera.position.y += movement.y;
+        player.camera.position.y += movement.y;
 
-        camera.position.z += movement.z / PLAYER_MOVEMENT_SENSITIVITY;
+        player.camera.position.z += movement.z / PLAYER_MOVEMENT_SENSITIVITY;
 
         // -------------------- Retarget stuff --------------------
 
@@ -257,9 +317,9 @@ int main(int argc, char* argv[]){
         Matrix rotation2 = MatrixRotateXYZ((Vector3){ PI*2 - rotation.y, PI*2 - rotation.x, 0 });
         Matrix transform = MatrixMultiply(translation, rotation2);
 
-        camera.target.x = camera.position.x - transform.m12;
-        camera.target.y = camera.position.y - transform.m13;
-        camera.target.z = camera.position.z - transform.m14;
+        player.camera.target.x = player.camera.position.x - transform.m12;
+        player.camera.target.y = player.camera.position.y - transform.m13;
+        player.camera.target.z = player.camera.position.z - transform.m14;
         BeginDrawing();
         ClearBackground(RAYWHITE);
         if (showHUD == true){
@@ -275,14 +335,12 @@ int main(int argc, char* argv[]){
             }
         }
 
-        BeginMode3D(camera);
+        BeginMode3D(player.camera);
             DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY);
             Vector3 position;
                     position.x = 0;
                     position.y = 0;
                     position.z = 0;
-
-
             for (int i = 0; i < 10 * CHUNK_LENGTH; i +=  CHUNK_LENGTH){
                 printf("i : %d\n", i);
                 createChunk(cubePosition.x + i, cubePosition.y, cubePosition.z);
@@ -324,8 +382,8 @@ int main(int argc, char* argv[]){
         camera.position = (Vector3){ camera.position.x, camera.position.y - 0.7f , camera.position.z};
         }
     };*/
-    PlayerPosition = (Vector3){camera.position.x , camera.position.y, camera.position.z};
-    PlayerPositionFloor = (Vector3){camera.position.x , camera.position.y - 10.0f, camera.position.z};
+    PlayerPosition = (Vector3){player.camera.position.x , player.camera.position.y, player.camera.position.z};
+    PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - 10.0f, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     }
