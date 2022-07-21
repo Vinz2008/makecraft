@@ -5,7 +5,6 @@
 #include <lauxlib.h>
 
 
-FILE* fp;
 
 int lua_printTest(lua_State *L){
     FILE* fp2 = fopen("log2.txt", "w");
@@ -34,7 +33,7 @@ int lua_createBlock(lua_State *L){
 }
 
 void runLuaFile(char* filename){
-    fp = fopen("log.txt", "w");
+    FILE* fp = fopen("log.txt", "w");
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     fprintf(fp, "started lua\n");

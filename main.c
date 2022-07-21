@@ -19,7 +19,6 @@
 #include "lib/misc/startswith.h"
 #include "lib/lua_api/lua_api.h"
 #include "lib/noise/noise1234.h"
-#define PLAYER_HEIGHT 5.0f
 #ifdef WIN32
 #include <io.h>
 #define F_OK 0
@@ -38,6 +37,10 @@
 #define CAMERA_MOUSE_MOVE_SENSITIVITY 0.001f
 
 #define CHUNK_LENGTH 9
+#define PLAYER_HEIGHT 5.0f
+#define CUBE_SIZE 2.0f
+
+FILE* fp;
 
 typedef struct {
    Vector3 cubeCenter;
@@ -126,15 +129,22 @@ void addToBlockArray(BlockArray* blockArray, Block block){
     blockArray->blockArray[blockArray->used++] = block;
 }
 
+
+void emptyArray(BlockArray* blockArray){
+    free(blockArray->blockArray);
+    blockArray->blockArray = NULL;
+    blockArray->used = blockArray->size = 0;
+}
+
 void createBlock(float x, float y, float z){
     Block tempBlock;
     tempBlock.x = x;
     tempBlock.y = y;
     tempBlock.z = z;
     addToBlockArray(&blockArray, tempBlock);
-    DrawCube((Vector3){x, y, z}, 2.0f, 2.0f, 2.0f, RED);
-    DrawCubeWires((Vector3){x, y, z}, 2.0f, 2.0f, 2.0f, BLACK);
-    DrawCubeTexture(DirtTexture, (Vector3){x, y , z}, 2.0f, 2.0f, 2.0f, WHITE);
+    DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
+    DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
+    DrawCubeTexture(DirtTexture, (Vector3){x, y , z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, WHITE);
 }
 
 void createChunk(float x, float y, float z){
@@ -150,8 +160,8 @@ void createChunk(float x, float y, float z){
             DrawCubeWires((Vector3){x + (float)i, y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
             DrawCubeTexture(DirtTexture, (Vector3){x + (float)i, y * temp, z + (float)i2},2.0f,2.0f,2.0f ,WHITE);*/
             createBlock(x + (float)i, y * temp, z + (float)i2);
-            DrawBoundingBox(PlayerHitBox, BLACK);
-            DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
+            //DrawBoundingBox(PlayerHitBox, BLACK);
+            //DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
             //}        
         }
     }
@@ -161,6 +171,7 @@ void createChunk(float x, float y, float z){
 
 bool isPlayerInCollisionWithBlock(Player player, Block block){
     if (player.camera.position.x == block.x && player.camera.position.y == block.y){
+        printf("collision\n");
         return true;
     }
     return false;
@@ -181,8 +192,8 @@ bool isPlayerInCollisionWithABlock(Player player, BlockArray blockArray){
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
+     fp = fopen("log.txt", "w");
     player.camera.fovy= 0;
-    initBlockArray(&blockArray, 100);
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
     if (argc > 0){
@@ -223,6 +234,9 @@ int main(int argc, char* argv[]){
     Image DirtTextureMap = LoadImage("textures/dirt.png");
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
     Rectangle textBox = {10, 10,  screenWidth/10, screenHeight/5};
+    Ray ray = { 0 };
+    RayCollision collision = { 0 };
+
     bool mouseOnText = false;
     int framesCounter = 0;
     int letterCount = 0;
@@ -246,6 +260,7 @@ int main(int argc, char* argv[]){
     // Main game loop
     while (!exitWindow){   // Detect window close button or ESC key  
         //UpdateCamera(&camera);
+        initBlockArray(&blockArray, 100);
         if (IsKeyPressed(KEY_V) || WindowShouldClose()) exitWindow = true;
         if (IsKeyPressed(KEY_ESCAPE)){
             showHUD = (showHUD == true) ? false : true;
@@ -320,6 +335,19 @@ int main(int argc, char* argv[]){
         player.camera.target.x = player.camera.position.x - transform.m12;
         player.camera.target.y = player.camera.position.y - transform.m13;
         player.camera.target.z = player.camera.position.z - transform.m14;
+
+
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            if (!collision.hit){
+                ray = GetMouseRay(GetMousePosition(), player.camera);
+                collision = GetRayCollisionBox(ray,
+                            (BoundingBox){(Vector3){ cubePosition.x - CUBE_SIZE/2, cubePosition.y - CUBE_SIZE/2, cubePosition.z - CUBE_SIZE/2 },
+                                          (Vector3){ cubePosition.x + CUBE_SIZE/2, cubePosition.y + CUBE_SIZE/2, cubePosition.z + CUBE_SIZE/2 }});
+            }
+            else collision.hit = false;
+        }    
+        
         BeginDrawing();
         ClearBackground(RAYWHITE);
         if (showHUD == true){
@@ -372,7 +400,8 @@ int main(int argc, char* argv[]){
 
         EndMode3D();
         //camera.position.y -= 1;
-
+        DrawLine(screenWidth/2, screenHeight/2, screenWidth/2 , screenHeight/2 - screenHeight/20, GRAY);
+        DrawLine(screenWidth/2 - screenWidth/40, screenHeight/2 - screenHeight/40, screenWidth/2 + screenWidth/40, screenHeight/2 - screenHeight/40, GRAY);
         DrawFPS(10, 10);
         
 
@@ -386,6 +415,10 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - 10.0f, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
+    if(isPlayerInCollisionWithABlock(player, blockArray)){
+
+    }
+    emptyArray(&blockArray);
     }
 #endif
 
