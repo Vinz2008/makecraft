@@ -1,5 +1,5 @@
 CC      = gcc
-CFLAGS  =
+CFLAGS  = 
 LDFLAGS = -llua -lm
 
 .PHONY: all clean
@@ -7,7 +7,7 @@ LDFLAGS = -llua -lm
 all: clean liblua_api.a
 
 lua.o:
-	$(CC) -o $@ lua.c -c $(CCFLAGS) $(LDFLAGS)
+	$(CC) -o $@ lua.c -c $(CFLAGS) $(LDFLAGS)
 
 liblua_api.a: lua.o
 	ar rcs liblua_api.a $^

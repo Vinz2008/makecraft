@@ -373,6 +373,19 @@ int main(int argc, char* argv[]){
                 printf("i : %d\n", i);
                 createChunk(cubePosition.x + i, cubePosition.y, cubePosition.z);
             }
+            int height = 100;
+            int width = 100;
+            int frequency1 = 1;
+            int frequency2 = 2;
+            int frequency3 = 4;
+            float** elevation = malloc(sizeof(float*) * 1000);
+            for (int y = 0; y < height; y++){
+                for (int x = 0; x < width; x++){
+                   float nx = x/width - 0.5, ny = y/height;
+                   elevation[y] = malloc(sizeof(float) * 1000);
+                   elevation[y][x] = 1 * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) + 0.25 * noise2(frequency3 * nx, 4 * ny);
+                }
+            }
             /*for (i2 = 0; i2 < 36; i2 = i2 + 2) {
             for (i = 0; i < 36; i = i + 2) {
             __uint16_t noise_gen = PerlinNoise2D(1, 1, 1, 1, 1,1 );
