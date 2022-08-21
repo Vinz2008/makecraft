@@ -102,19 +102,6 @@ float noise(int x, int y) {
 }
 
 
-__int16_t PerlinNoise2D( float x, float y, float amp, __int32_t octaves, __int32_t px, __int32_t py )
-{
-  float noise = 0.f;
-  for(int octave = 1; octave < octaves; octave *= 2){
-    // Add in fractions of faster varying noise at lower amplitudes 
-    // for higher octaves. Assuming x is normalized, WHEN octave==px
-    // you get full period. Higher frequencies will go out and also meet period.
-    noise += pnoise2( x*px*octave, y*py*octave, px, py ) / octave;
-  }
-  return USHRT_MAX/2.f + amp*noise;
-}
-
-
 void initBlockArray(BlockArray* blockArray, size_t initalSize){
     blockArray->blockArray = malloc(sizeof(Block) * initalSize);
     blockArray->used = 0;
@@ -130,7 +117,7 @@ void addToBlockArray(BlockArray* blockArray, Block block){
 }
 
 
-void emptyArray(BlockArray* blockArray){
+void emptyBlockArray(BlockArray* blockArray){
     free(blockArray->blockArray);
     blockArray->blockArray = NULL;
     blockArray->used = blockArray->size = 0;
@@ -160,6 +147,7 @@ void createChunk(float x, float y, float z){
             DrawCubeWires((Vector3){x + (float)i, y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
             DrawCubeTexture(DirtTexture, (Vector3){x + (float)i, y * temp, z + (float)i2},2.0f,2.0f,2.0f ,WHITE);*/
             createBlock(x + (float)i, y * temp, z + (float)i2);
+            addToBlockArray(blockArray);
             //DrawBoundingBox(PlayerHitBox, BLACK);
             //DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
             //}        
@@ -236,7 +224,7 @@ int main(int argc, char* argv[]){
     Rectangle textBox = {10, 10,  screenWidth/10, screenHeight/5};
     Ray ray = { 0 };
     RayCollision collision = { 0 };
-
+    float** elevation;
     bool mouseOnText = false;
     int framesCounter = 0;
     int letterCount = 0;
@@ -244,6 +232,7 @@ int main(int argc, char* argv[]){
     SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
+    elevation = malloc(sizeof(float*) * 1000);
 
     //--------------------------------------------------------------------------------------
 
@@ -378,14 +367,18 @@ int main(int argc, char* argv[]){
             int frequency1 = 1;
             int frequency2 = 2;
             int frequency3 = 4;
-            float** elevation = malloc(sizeof(float*) * 1000);
+            FILE* test = fopen("log-gen.txt", "w");
             for (int y = 0; y < height; y++){
                 for (int x = 0; x < width; x++){
                    float nx = x/width - 0.5, ny = y/height;
-                   elevation[y] = malloc(sizeof(float) * 1000);
-                   elevation[y][x] = 1 * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) + 0.25 * noise2(frequency3 * nx, 4 * ny);
+                   elevation[y] = malloc(sizeof(float) * 100);
+                   elevation[y][x] = (float) (int) 1 * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) + 0.25 * noise2(frequency3 * nx, 4 * ny);
+                   fprintf(test, "elevation[%i][%i] : %f\n", y, x, elevation[y][x]);
                 }
             }
+            fclose(test);
+
+
             /*for (i2 = 0; i2 < 36; i2 = i2 + 2) {
             for (i = 0; i < 36; i = i + 2) {
             __uint16_t noise_gen = PerlinNoise2D(1, 1, 1, 1, 1,1 );
@@ -431,7 +424,10 @@ int main(int argc, char* argv[]){
     if(isPlayerInCollisionWithABlock(player, blockArray)){
 
     }
-    emptyArray(&blockArray);
+    emptyBlockArray(&blockArray);
+    for (int y = 0; y < height; y++){
+    free(elevation[y]);
+    }
     }
 #endif
 
@@ -441,7 +437,7 @@ int main(int argc, char* argv[]){
     UnloadTexture(DirtTexture);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
-
+    free(elevation);
     return 0;
 }
 
