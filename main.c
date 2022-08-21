@@ -146,8 +146,12 @@ void createChunk(float x, float y, float z){
             /*DrawCube((Vector3){x + (float)i , y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires((Vector3){x + (float)i, y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
             DrawCubeTexture(DirtTexture, (Vector3){x + (float)i, y * temp, z + (float)i2},2.0f,2.0f,2.0f ,WHITE);*/
+            Block tempBlock;
+            tempBlock.x = x + (float)i;
+            tempBlock.y = y * temp;
+            tempBlock.z = z + (float)i2;
             createBlock(x + (float)i, y * temp, z + (float)i2);
-            addToBlockArray(blockArray);
+            addToBlockArray(&blockArray, tempBlock);
             //DrawBoundingBox(PlayerHitBox, BLACK);
             //DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
             //}        
