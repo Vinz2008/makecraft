@@ -159,10 +159,12 @@ void createChunk(float x, float y, float z){
     }
 }
 
-
+bool isNumberAround(float nb, float nb2, float precision){
+    return ((nb <= nb2 && nb >= nb2 - precision) || (nb >= nb2 && nb <= nb2 + precision));
+}
 
 bool isPlayerInCollisionWithBlock(Player player, Block block){
-    if (player.camera.position.x == block.x && player.camera.position.y == block.y){
+    if (isNumberAround(player.camera.position.x, block.x, 1.0f) && isNumberAround(player.camera.position.y, block.y, 1.0f) && isNumberAround(player.camera.position.z, block.z, 1.0f)){
         printf("collision\n");
         return true;
     }
@@ -170,7 +172,7 @@ bool isPlayerInCollisionWithBlock(Player player, Block block){
 }
 
 
-bool isPlayerInCollisionWithABlock(Player player, BlockArray blockArray){
+bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray blockArray){
     for (int i = 0; i < blockArray.used; i++) {
         if (isPlayerInCollisionWithBlock(player, blockArray.blockArray[i])){
             return true;
@@ -184,7 +186,7 @@ bool isPlayerInCollisionWithABlock(Player player, BlockArray blockArray){
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
-     fp = fopen("log.txt", "w");
+    fp = fopen("log.txt", "w");
     player.camera.fovy= 0;
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
@@ -312,6 +314,8 @@ int main(int argc, char* argv[]){
             movement.y -= 0.12f;
         if (IsKeyDown(KEY_SPACE))
             movement.y += 0.12f;
+        
+        movement.y -= 0.06f;
 
         player.camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
 
@@ -329,6 +333,7 @@ int main(int argc, char* argv[]){
         player.camera.target.y = player.camera.position.y - transform.m13;
         player.camera.target.z = player.camera.position.z - transform.m14;
 
+        isPlayerInCollisionWithArrayBlock(player, blockArray);
 
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -403,8 +408,7 @@ int main(int argc, char* argv[]){
             }
             BoundingBox cubeBox = {cubePosition, (Vector3){cubePosition.x + 1.0f, cubePosition.y + 1.0f, cubePosition.z + 1.0f}};
             Ray rayPointerPlayer = {PlayerPosition, (Vector3){camera.position.x, 1.0f, camera.position.z}};
-            DrawGrid(10, 1.0f);
-            DrawRay(rayPointerPlayer, WHITE);
+            DrawGrid(10, 1.0f);    player.camera.position.y -= 1
             GetRayCollisionBox(rayPointerPlayer,cubeBox);
             */
 
@@ -425,9 +429,6 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - 10.0f, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
-    if(isPlayerInCollisionWithABlock(player, blockArray)){
-
-    }
     emptyBlockArray(&blockArray);
     for (int y = 0; y < height; y++){
     free(elevation[y]);
