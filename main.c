@@ -43,19 +43,27 @@
 FILE* fp;
 
 typedef struct {
-   Vector3 cubeCenter;
-   Vector3 cubeTopRight;
-   Vector3 cubeTopLeft
-}CHUNK;
-
-
-
-typedef struct {
     float x;
     float y;
     float z;
     int material;
 }Block;
+
+struct blockColumn {
+    Block* blockArray;
+    size_t used;
+    size_t size;
+};
+
+typedef struct {
+    Vector3 cubeCenter;
+    Vector3 cubeTopRight;
+    Vector3 cubeTopLeft;
+    struct blockColumn* BlockColumn;
+}CHUNK;
+
+
+
 
 typedef struct {
     Block* blockArray;
@@ -381,7 +389,7 @@ int main(int argc, char* argv[]){
                 for (int x = 0; x < width; x++){
                    float nx = x/width - 0.5, ny = y/height;
                    elevation[y] = malloc(sizeof(float) * 100);
-                   elevation[y][x] = (float) (int) 1 * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) + 0.25 * noise2(frequency3 * nx, 4 * ny);
+                   elevation[y][x] = /*(float) (int)*/ 1.00f * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) /*+ 0.25 * noise2(frequency3 * nx, 4 * ny)*/;
                    fprintf(test, "elevation[%i][%i] : %f\n", y, x, elevation[y][x]);
                 }
             }
