@@ -1,10 +1,9 @@
 #include "lua_api.h"
 #include "../../makecraft.h"
+#include "../../block.h"
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
-
-
 
 int lua_printTest(lua_State *L){
     FILE* fp2 = fopen("log2.txt", "w");

@@ -16,6 +16,8 @@
 #include <limits.h>
 #include "raylib.h"
 #include "raymath.h"
+#define RLIGHTS_IMPLEMENTATION
+#include "rlights.h"
 #include "lib/misc/startswith.h"
 #include "lib/lua_api/lua_api.h"
 #include "lib/noise/noise1234.h"
@@ -25,6 +27,13 @@
 #define access _access
 #else
 #include <unistd.h>
+#endif
+#include "block.h"
+
+#if defined(PLATFORM_DESKTOP)
+    #define GLSL_VERSION            330
+#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+    #define GLSL_VERSION            100
 #endif
 
 
@@ -38,17 +47,8 @@
 
 #define CHUNK_LENGTH 9
 #define PLAYER_HEIGHT 5.0f
-#define CUBE_SIZE 2.0f
 
 FILE* fp;
-
-typedef struct {
-    float x;
-    float y;
-    float z;
-    int material;
-}Block;
-
 struct blockColumn {
     Block* blockArray;
     size_t used;
@@ -64,13 +64,6 @@ typedef struct {
 
 
 
-
-typedef struct {
-    Block* blockArray;
-    size_t used;
-    size_t size;
-}BlockArray;
-
 typedef struct {
     Camera camera;
 }Player;
@@ -79,7 +72,7 @@ Player player;
 
 
 
-BlockArray blockArray;
+extern BlockArray blockArray;
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -93,7 +86,7 @@ static Vector2 lastMousePos;
 static Vector3 movement = {0, -0.2f, 0};
 static Vector3 rotation;
 Texture2D DirtTexture;
-
+Shader shader;
 
 Vector3* cubeArrayPos;
 
@@ -110,37 +103,6 @@ float noise(int x, int y) {
 }
 
 
-void initBlockArray(BlockArray* blockArray, size_t initalSize){
-    blockArray->blockArray = malloc(sizeof(Block) * initalSize);
-    blockArray->used = 0;
-    blockArray->size = initalSize;
-}
-
-void addToBlockArray(BlockArray* blockArray, Block block){
-     if (blockArray->used == blockArray->size){
-        blockArray->size *=2;
-        blockArray->blockArray = realloc(blockArray->blockArray, blockArray->size * sizeof(Block));
-    }
-    blockArray->blockArray[blockArray->used++] = block;
-}
-
-
-void emptyBlockArray(BlockArray* blockArray){
-    free(blockArray->blockArray);
-    blockArray->blockArray = NULL;
-    blockArray->used = blockArray->size = 0;
-}
-
-void createBlock(float x, float y, float z){
-    Block tempBlock;
-    tempBlock.x = x;
-    tempBlock.y = y;
-    tempBlock.z = z;
-    addToBlockArray(&blockArray, tempBlock);
-    DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
-    DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
-    DrawCubeTexture(DirtTexture, (Vector3){x, y , z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, WHITE);
-}
 
 void createChunk(float x, float y, float z){
     int i;
@@ -223,7 +185,10 @@ int main(int argc, char* argv[]){
     int i3;
 
     InitWindow(screenWidth, screenHeight, "raylib");
-    
+    shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
+    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    SetShaderValue(shader, ambientLoc, (float[4]){ 0.1f, 0.1f, 0.1f, 1.0f }, SHADER_UNIFORM_VEC4);
     player.camera.position = (Vector3){ 10.0f, PLAYER_HEIGHT + 10.0f, 8.0f };
     player.camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     player.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
