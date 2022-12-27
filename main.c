@@ -353,7 +353,7 @@ int main(int argc, char* argv[]){
             for (int y = 0; y < height; y++){
                 for (int x = 0; x < width; x++){
                    float nx = x/width - 0.5, ny = y/height;
-                   elevation[y] = malloc(sizeof(float) * 100);
+                   elevation[y] = malloc(sizeof(float*) * 100);
                    elevation[y][x] = /*(float) (int)*/ 1.00f * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) /*+ 0.25 * noise2(frequency3 * nx, 4 * ny)*/;
                    fprintf(test, "elevation[%i][%i] : %f\n", y, x, elevation[y][x]);
                    free(elevation[y]);
