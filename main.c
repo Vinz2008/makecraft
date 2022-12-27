@@ -356,6 +356,7 @@ int main(int argc, char* argv[]){
                    elevation[y] = malloc(sizeof(float) * 100);
                    elevation[y][x] = /*(float) (int)*/ 1.00f * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) /*+ 0.25 * noise2(frequency3 * nx, 4 * ny)*/;
                    fprintf(test, "elevation[%i][%i] : %f\n", y, x, elevation[y][x]);
+                   free(elevation[y]);
                 }
             }
             fclose(test);
@@ -403,9 +404,9 @@ int main(int argc, char* argv[]){
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     emptyBlockArray(&blockArray);
-    for (int y = 0; y < height; y++){
+    /*for (int y = 0; y < height; y++){
     free(elevation[y]);
-    }
+    }*/
     }
 #endif
 
