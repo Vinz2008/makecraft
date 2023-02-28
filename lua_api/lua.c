@@ -1,9 +1,12 @@
 #include "lua_api.h"
-#include "../../makecraft.h"
-#include "../../block.h"
+#include "../makecraft.h"
+#include "../map/block.h"
+#include "../map/chunk.h"
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+
+extern BlockArray* blockArray;
 
 int lua_printTest(lua_State *L){
     FILE* fp2 = fopen("log2.txt", "w");
@@ -16,7 +19,7 @@ int lua_createChunk(lua_State *L){
     float x_chunk = luaL_checknumber(L, 1);
     float y_chunk = luaL_checknumber(L, 2);
     float z_chunk = luaL_checknumber(L, 3);
-    createChunk(x_chunk, y_chunk, z_chunk);
+    createChunk(blockArray, x_chunk, y_chunk, z_chunk);
     return 1;
 }
 
@@ -27,7 +30,7 @@ int lua_createBlock(lua_State *L){
     printf("x_block float : %f\n", x_block);
     printf("y_block float : %f\n", y_block);
     printf("z_block float : %f\n", z_block);
-    createBlock((float)x_block, (float)y_block, (float)z_block);
+    createBlock(blockArray, (float)x_block, (float)y_block, (float)z_block);
     return 1;
 }
 

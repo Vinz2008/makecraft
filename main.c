@@ -18,9 +18,8 @@
 #include "raymath.h"
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
-#include "lib/misc/startswith.h"
-#include "lib/lua_api/lua_api.h"
-#include "lib/noise/noise1234.h"
+#include "lib/startswith.h"
+#include "lua_api/lua_api.h"
 #ifdef WIN32
 #include <io.h>
 #define F_OK 0
@@ -28,7 +27,9 @@
 #else
 #include <unistd.h>
 #endif
-#include "block.h"
+#include "map/chunk.h"
+#include "map/block.h"
+#include "noise/noise.h"
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
@@ -45,7 +46,6 @@
 #define PLAYER_MOVEMENT_SENSITIVITY 3
 #define CAMERA_MOUSE_MOVE_SENSITIVITY 0.001f
 
-#define CHUNK_LENGTH 9
 #define PLAYER_HEIGHT 5.0f
 
 FILE* fp;
@@ -62,6 +62,12 @@ typedef struct {
     struct blockColumn* BlockColumn;
 }CHUNK;
 
+typedef struct {
+    CHUNK* chunk;
+    size_t size;
+    size_t used;
+} chunkList;
+
 
 
 typedef struct {
@@ -72,7 +78,7 @@ Player player;
 
 
 
-extern BlockArray blockArray;
+BlockArray* blockArray;
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -103,32 +109,6 @@ float noise(int x, int y) {
 }
 
 
-
-void createChunk(float x, float y, float z){
-    int i;
-    int i2;
-    for (i2 = 0; i2 < CHUNK_LENGTH * 2; i2 = i2 + 2) {
-        for (i = 0; i < CHUNK_LENGTH * 2; i = i + 2) {
-            //__uint16_t noise_gen = PerlinNoise2D(1, 1, 1, 1, 1,1 );
-            //printf("noise : %d\n", noise_gen);
-            int temp = 1;
-            //for (int temp = 1; temp < noise_gen/10000; temp++){
-            /*DrawCube((Vector3){x + (float)i , y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, RED);
-            DrawCubeWires((Vector3){x + (float)i, y * temp, z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
-            DrawCubeTexture(DirtTexture, (Vector3){x + (float)i, y * temp, z + (float)i2},2.0f,2.0f,2.0f ,WHITE);*/
-            Block tempBlock;
-            tempBlock.x = x + (float)i;
-            tempBlock.y = y * temp;
-            tempBlock.z = z + (float)i2;
-            createBlock(x + (float)i, y * temp, z + (float)i2);
-            addToBlockArray(&blockArray, tempBlock);
-            //DrawBoundingBox(PlayerHitBox, BLACK);
-            //DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
-            //}        
-        }
-    }
-}
-
 bool isNumberAround(float nb, float nb2, float precision){
     return ((nb <= nb2 && nb >= nb2 - precision) || (nb >= nb2 && nb <= nb2 + precision));
 }
@@ -156,8 +136,11 @@ bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray blockArray){
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
+    float** noise = create_noise();
+    write_noise_to_file(noise, "noise.txt");
     fp = fopen("log.txt", "w");
     player.camera.fovy= 0;
+    blockArray = malloc(sizeof(BlockArray));
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
     if (argc > 0){
@@ -228,7 +211,7 @@ int main(int argc, char* argv[]){
     // Main game loop
     while (!exitWindow){   // Detect window close button or ESC key  
         //UpdateCamera(&camera);
-        initBlockArray(&blockArray, 100);
+        initBlockArray(blockArray, 100);
         if (IsKeyPressed(KEY_V) || WindowShouldClose()) exitWindow = true;
         if (IsKeyPressed(KEY_ESCAPE)){
             showHUD = (showHUD == true) ? false : true;
@@ -306,7 +289,7 @@ int main(int argc, char* argv[]){
         player.camera.target.y = player.camera.position.y - transform.m13;
         player.camera.target.z = player.camera.position.z - transform.m14;
 
-        isPlayerInCollisionWithArrayBlock(player, blockArray);
+        isPlayerInCollisionWithArrayBlock(player, *blockArray);
 
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -342,24 +325,24 @@ int main(int argc, char* argv[]){
                     position.z = 0;
             for (int i = 0; i < 10 * CHUNK_LENGTH; i +=  CHUNK_LENGTH){
                 printf("i : %d\n", i);
-                createChunk(cubePosition.x + i, cubePosition.y, cubePosition.z);
+                createChunk(blockArray, cubePosition.x + i, cubePosition.y, cubePosition.z);
             }
             int height = 100;
             int width = 100;
             int frequency1 = 1;
             int frequency2 = 2;
             int frequency3 = 4;
-            FILE* test = fopen("log-gen.txt", "w");
+            /*FILE* test = fopen("log-gen.txt", "w");
             for (int y = 0; y < height; y++){
                 for (int x = 0; x < width; x++){
                    float nx = x/width - 0.5, ny = y/height;
                    elevation[y] = malloc(sizeof(float*) * 100);
-                   elevation[y][x] = /*(float) (int)*/ 1.00f * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny) /*+ 0.25 * noise2(frequency3 * nx, 4 * ny)*/;
+                   elevation[y][x] =  1.00f * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny);
                    fprintf(test, "elevation[%i][%i] : %f\n", y, x, elevation[y][x]);
                    free(elevation[y]);
                 }
             }
-            fclose(test);
+            fclose(test);*/
 
 
             /*for (i2 = 0; i2 < 36; i2 = i2 + 2) {
@@ -403,7 +386,7 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - 10.0f, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
-    emptyBlockArray(&blockArray);
+    emptyBlockArray(blockArray);
     /*for (int y = 0; y < height; y++){
     free(elevation[y]);
     }*/

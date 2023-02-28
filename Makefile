@@ -195,6 +195,7 @@ endif
 #  -Wno-missing-braces  ignore invalid warning (GCC bug 53119)
 #  -D_DEFAULT_SOURCE    use with -std=c99 on Linux and PLATFORM_WEB, required for timespec
 CFLAGS += -Wall -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces
+CFLAGS += -I/usr/local/include -L/usr/local/lib
 
 ifeq ($(BUILD_MODE),DEBUG)
     CFLAGS += -g -O0
@@ -348,10 +349,12 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
 endif
 
 
-LDLIBS += lib/noise/libnoise.a
-LDLIBS += lib/misc/misc.a
+LDLIBS += noise/libnoise.a
+LDLIBS += lib/misc.a
 LDLIBS += -llua -lm
-LDLIBS += lib/lua_api/liblua_api.a
+LDLIBS += lua_api/liblua_api.a
+LDLIBS += map/libmap.a
+LDLIBS += -lnoise 
 
 
 
@@ -368,7 +371,6 @@ SRC = $(call rwildcard, *.c, *.h)
 #OBJS ?= main.c
 OBJS =\
 main.o \
-block.o \
 
 # For Android platform we call a custom Makefile.Android
 ifeq ($(PLATFORM),PLATFORM_ANDROID)
@@ -382,9 +384,10 @@ endif
 # Default target entry
 # NOTE: We call this Makefile target or Makefile.Android target
 all: clean
-	$(MAKE) -C lib/noise/
-	$(MAKE) -C lib/misc/
-	$(MAKE) -C lib/lua_api/
+	$(MAKE) -C noise/
+	$(MAKE) -C lib/
+	$(MAKE) -C lua_api/
+	$(MAKE) -C map/
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME
@@ -419,8 +422,10 @@ endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
 	del *.o *.html *.js
 endif
-	$(MAKE) -C lib/noise/ clean
-	$(MAKE) -C lib/lua_api/ clean
+	$(MAKE) -C noise/ clean
+	$(MAKE) -C lua_api/ clean
+	$(MAKE) -C lib/ clean
+	$(MAKE) -C map/ clean
 	@echo Cleaning done
 
 raylib:

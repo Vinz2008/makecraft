@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include "raylib.h"
 #include "raymath.h"
-
-BlockArray blockArray;
+#include "chunk.h"
 
 extern Texture2D DirtTexture;
 
@@ -28,15 +27,16 @@ void emptyBlockArray(BlockArray* blockArray){
     blockArray->used = blockArray->size = 0;
 }
 
-void createBlock(float x, float y, float z){
-    Block tempBlock;
-    tempBlock.x = x;
-    tempBlock.y = y;
-    tempBlock.z = z;
-    addToBlockArray(&blockArray, tempBlock);
+Block* createBlock(BlockArray* blockArray, float x, float y, float z){
+    Block* tempBlock = malloc(sizeof(tempBlock));
+    tempBlock->x = x;
+    tempBlock->y = y;
+    tempBlock->z = z;
+    addToBlockArray(blockArray, *tempBlock);
     //Model tempCube = LoadModelFromMesh(GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE));
     //DrawModel(tempCube, (Vector3){x, y, z}, 1,RED);
     DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
     DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
     DrawCubeTexture(DirtTexture, (Vector3){x, y  , z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , WHITE);
+    return tempBlock;
 }
