@@ -1,4 +1,7 @@
-#define DIRT_MATERIAL 1
+enum material {
+    dirt_texture = -1,
+    stone_texture = -2,
+};
 
 
 #define LOG(x) fprintf(fp, x);

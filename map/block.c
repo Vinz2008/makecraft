@@ -3,8 +3,10 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "chunk.h"
+#include "../makecraft.h"
 
 extern Texture2D DirtTexture;
+extern Texture2D StoneTexture;
 
 void initBlockArray(BlockArray* blockArray, size_t initalSize){
     blockArray->blockArray = malloc(sizeof(Block) * initalSize);
@@ -27,7 +29,7 @@ void emptyBlockArray(BlockArray* blockArray){
     blockArray->used = blockArray->size = 0;
 }
 
-Block* createBlock(BlockArray* blockArray, float x, float y, float z){
+Block* createBlock(BlockArray* blockArray, float x, float y, float z, int texture){
     Block* tempBlock = malloc(sizeof(tempBlock));
     tempBlock->x = x;
     tempBlock->y = y;
@@ -35,8 +37,14 @@ Block* createBlock(BlockArray* blockArray, float x, float y, float z){
     //addToBlockArray(blockArray, *tempBlock);
     //Model tempCube = LoadModelFromMesh(GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE));
     //DrawModel(tempCube, (Vector3){x, y, z}, 1,RED);
-    DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
+    //DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
     DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
-    DrawCubeTexture(DirtTexture, (Vector3){x, y  , z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , WHITE);
+    Texture2D* texture2dBlock = NULL;
+    if (texture == dirt_texture){
+        texture2dBlock = &DirtTexture;
+    }  else if (texture == stone_texture){
+        texture2dBlock = &StoneTexture;
+    }
+    DrawCubeTexture(*texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , WHITE);
     return tempBlock;
 }

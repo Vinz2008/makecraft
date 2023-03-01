@@ -94,6 +94,7 @@ static Vector2 lastMousePos;
 static Vector3 movement = {0, -0.2f, 0};
 static Vector3 rotation;
 Texture2D DirtTexture;
+Texture2D StoneTexture;
 Shader shader;
 
 Vector3* cubeArrayPos;
@@ -141,7 +142,12 @@ int main(int argc, char* argv[]){
     initBlockArray(blockArray, NB_BLOCK_NOISE);
     for (int x = 0; x < NB_BLOCK_NOISE; x++){
         for (int y = 0; y < NB_BLOCK_NOISE; y++){
-        addToBlockArray(blockArray, (Block){x, y, get_noise_data(farray, x, y, NB_BLOCK_NOISE), DIRT_MATERIAL});
+        int z = get_noise_data(farray, x, y, NB_BLOCK_NOISE);
+        int texture = dirt_texture;
+        if (z < 10 || z > 30){
+            texture = stone_texture;
+        }
+        addToBlockArray(blockArray, (Block){x, y, z, texture});
     }
     }
     printf("blockArraysize : %d\n", blockArray->used);
@@ -188,7 +194,9 @@ int main(int argc, char* argv[]){
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     Image DirtTextureMap = LoadImage("textures/dirt.png");
+    Image StoneTextureMap = LoadImage("textures/stone.png");
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
+    StoneTexture = LoadTextureFromImage(StoneTextureMap);
     Rectangle textBox = {10, 10,  screenWidth/10, screenHeight/5};
     Ray ray = { 0 };
     RayCollision collision = { 0 };
@@ -333,8 +341,12 @@ int main(int argc, char* argv[]){
                 for (float y = 0; y < NB_BLOCK_NOISE; y++){
                     float znoise = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
                     float mult = 2.0f;
+                    int texture = dirt_texture;
+                    if (znoise < 5 || znoise > 10){
+                        texture = stone_texture;
+                    }
                     //printf("create block x %f, y %f, z %f\n", x*mult, znoise*mult, y*mult);
-                    Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult);
+                    Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult, texture);
                     //addToBlockArray(blockArray, *tempBlock);
                 }
             }

@@ -30,7 +30,7 @@ void initBlockArray(BlockArray* blockArray, size_t initalSize);
 void addToBlockArray(BlockArray* blockArray, Block block);
 void emptyBlockArray(BlockArray* blockArray);
 
-Block* createBlock(BlockArray* blockArray, float x, float y, float z);
+Block* createBlock(BlockArray* blockArray, float x, float y, float z, int texture);
 
 #ifdef __cplusplus
 }

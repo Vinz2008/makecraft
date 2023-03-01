@@ -30,7 +30,7 @@ int lua_createBlock(lua_State *L){
     printf("x_block float : %f\n", x_block);
     printf("y_block float : %f\n", y_block);
     printf("z_block float : %f\n", z_block);
-    createBlock(blockArray, (float)x_block, (float)y_block, (float)z_block);
+    createBlock(blockArray, (float)x_block, (float)y_block, (float)z_block, dirt_texture);
     return 1;
 }
 
