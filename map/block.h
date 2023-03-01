@@ -1,10 +1,17 @@
 #include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {            // Prevents name mangling of functions
+#endif
+
 #include "raylib.h"
 #include "raymath.h"
+
 
 #define CUBE_SIZE 2.0f
 
 #pragma once
+
 
 typedef struct {
     float x;
@@ -23,4 +30,8 @@ void initBlockArray(BlockArray* blockArray, size_t initalSize);
 void addToBlockArray(BlockArray* blockArray, Block block);
 void emptyBlockArray(BlockArray* blockArray);
 
-Block*createBlock(BlockArray* blockArray, float x, float y, float z);
+Block* createBlock(BlockArray* blockArray, float x, float y, float z);
+
+#ifdef __cplusplus
+}
+#endif

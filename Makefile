@@ -146,7 +146,7 @@ EXAMPLE_RUNTIME_PATH   ?= $(RAYLIB_RELEASE_PATH)
 
 # Define default C compiler: gcc
 # NOTE: define g++ compiler if using C++
-CC = gcc
+CC = g++
 
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),OSX)
@@ -194,7 +194,8 @@ endif
 #  -std=gnu99           defines C language mode (GNU C from 1999 revision)
 #  -Wno-missing-braces  ignore invalid warning (GCC bug 53119)
 #  -D_DEFAULT_SOURCE    use with -std=c99 on Linux and PLATFORM_WEB, required for timespec
-CFLAGS += -Wall -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces
+#CFLAGS += -Wall -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces
+CFLAGS += -Wall -D_DEFAULT_SOURCE -Wno-missing-braces
 CFLAGS += -I/usr/local/include -L/usr/local/lib
 
 ifeq ($(BUILD_MODE),DEBUG)
@@ -355,6 +356,7 @@ LDLIBS += -llua -lm
 LDLIBS += lua_api/liblua_api.a
 LDLIBS += map/libmap.a
 LDLIBS += -lnoise 
+LDLIBS += -lFastNoise
 
 
 
@@ -409,6 +411,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),LINUX)
 	find -type f -executable | xargs file -i | grep -E 'x-object|x-archive|x-sharedlib|x-executable' | rev | cut -d ':' -f 2- | rev | xargs rm -fv
 	rm -f makecraft
+	rm -f *.o
     endif
     ifeq ($(PLATFORM_OS),OSX)
 		find . -type f -perm +ugo+x -delete

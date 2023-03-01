@@ -27,10 +27,11 @@
 #else
 #include <unistd.h>
 #endif
+#include <vector>
 #include "map/chunk.h"
 #include "map/block.h"
 #include "map/serialize.h"
-#include "noise/noise.h"
+#include "noise/noise2.h"
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
@@ -44,7 +45,7 @@
 #endif
 
 
-#define PLAYER_MOVEMENT_SENSITIVITY 3
+#define PLAYER_MOVEMENT_SENSITIVITY 1.5
 #define CAMERA_MOUSE_MOVE_SENSITIVITY 0.001f
 
 #define PLAYER_HEIGHT 5.0f
@@ -102,13 +103,6 @@ Vector3* cubeArrayPos;
 //----------------------------------------------------------------------------------
 //static void UpdateDrawFrame(void);          // Update and draw one frame
 
-float noise(int x, int y) {
-    int n;
-    n = x + y * 57;
-    n = (n << 13) ^ n;
-    return (1.0 - ( (n * ((n * n * 15731) + 789221) +  1376312589) & 0x7fffffff) / 1073741824.0);
-}
-
 
 bool isNumberAround(float nb, float nb2, float precision){
     return ((nb <= nb2 && nb >= nb2 - precision) || (nb >= nb2 && nb <= nb2 + precision));
@@ -137,11 +131,21 @@ bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray blockArray){
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
-    float** noise = create_noise();
-    write_noise_to_file(noise, "noise.txt");
+    std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, 164647, 0.05);
+    write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
+    float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
+
     fp = fopen("log.txt", "w");
     player.camera.fovy= 0;
-    blockArray = malloc(sizeof(BlockArray));
+    blockArray = (BlockArray*)malloc(sizeof(BlockArray));
+    initBlockArray(blockArray, NB_BLOCK_NOISE);
+    for (int x = 0; x < NB_BLOCK_NOISE; x++){
+        for (int y = 0; y < NB_BLOCK_NOISE; y++){
+        addToBlockArray(blockArray, (Block){x, y, get_noise_data(farray, x, y, NB_BLOCK_NOISE), DIRT_MATERIAL});
+    }
+    }
+    printf("blockArraysize : %d\n", blockArray->used);
+    serialize_block_array(blockArray, "blockArray.bin");
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
     if (argc > 0){
@@ -172,7 +176,8 @@ int main(int argc, char* argv[]){
     shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     int ambientLoc = GetShaderLocation(shader, "ambient");
-    SetShaderValue(shader, ambientLoc, (float[4]){ 0.1f, 0.1f, 0.1f, 1.0f }, SHADER_UNIFORM_VEC4);
+    float locIndex[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    SetShaderValue(shader, ambientLoc, locIndex, SHADER_UNIFORM_VEC4);
     player.camera.position = (Vector3){ 10.0f, PLAYER_HEIGHT + 10.0f, 8.0f };
     player.camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     player.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
@@ -195,7 +200,7 @@ int main(int argc, char* argv[]){
     SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
-    elevation = malloc(sizeof(float*) * 1000);
+    elevation = (float**)malloc(sizeof(float*) * 1000);
 
     //--------------------------------------------------------------------------------------
 
@@ -212,7 +217,6 @@ int main(int argc, char* argv[]){
     // Main game loop
     while (!exitWindow){   // Detect window close button or ESC key  
         //UpdateCamera(&camera);
-        initBlockArray(blockArray, 100);
         if (IsKeyPressed(KEY_V) || WindowShouldClose()) exitWindow = true;
         if (IsKeyPressed(KEY_ESCAPE)){
             showHUD = (showHUD == true) ? false : true;
@@ -324,42 +328,23 @@ int main(int argc, char* argv[]){
                     position.x = 0;
                     position.y = 0;
                     position.z = 0;
-            for (int i = 0; i < 10 * CHUNK_LENGTH; i +=  CHUNK_LENGTH){
-                printf("i : %d\n", i);
-                createChunk(blockArray, cubePosition.x + i, cubePosition.y, cubePosition.z);
+
+            for (float x = 0; x < NB_BLOCK_NOISE; x++){
+                for (float y = 0; y < NB_BLOCK_NOISE; y++){
+                    float znoise = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
+                    float mult = 2.0f;
+                    //printf("create block x %f, y %f, z %f\n", x*mult, znoise*mult, y*mult);
+                    Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult);
+                    //addToBlockArray(blockArray, *tempBlock);
+                }
             }
+
+
             int height = 100;
             int width = 100;
             int frequency1 = 1;
             int frequency2 = 2;
             int frequency3 = 4;
-            /*FILE* test = fopen("log-gen.txt", "w");
-            for (int y = 0; y < height; y++){
-                for (int x = 0; x < width; x++){
-                   float nx = x/width - 0.5, ny = y/height;
-                   elevation[y] = malloc(sizeof(float*) * 100);
-                   elevation[y][x] =  1.00f * noise2(frequency1 * nx, frequency1 * ny) + 0.5 * noise2(frequency2 * nx, frequency2 * ny);
-                   fprintf(test, "elevation[%i][%i] : %f\n", y, x, elevation[y][x]);
-                   free(elevation[y]);
-                }
-            }
-            fclose(test);*/
-
-
-            /*for (i2 = 0; i2 < 36; i2 = i2 + 2) {
-            for (i = 0; i < 36; i = i + 2) {
-            __uint16_t noise_gen = PerlinNoise2D(1, 1, 1, 1, 1,1 );
-            printf("noise : %d\n", noise_gen);
-            for (int temp = 1; temp < noise_gen/10000; temp++){
-            DrawCube((Vector3){cubePosition.x + (float)i , cubePosition.y * temp, cubePosition.z + (float)i2}, 2.0f, 2.0f, 2.0f, RED);
-            DrawCubeWires((Vector3){cubePosition.x + (float)i, cubePosition.y * temp, cubePosition.z + (float)i2}, 2.0f, 2.0f, 2.0f, BLACK);
-            DrawCubeTexture(DirtTexture, (Vector3){cubePosition.x + (float)i, cubePosition.y * temp, cubePosition.z + (float)i2},2.0f,2.0f,2.0f ,WHITE);
-            DrawBoundingBox(PlayerHitBox, BLACK);
-            DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
-            }
-            
-            }
-            }*/
             /*for (i = 3; i < 27; i = i + 3) {
             DrawCube((Vector3){cubePosition.x + (float)i2, cubePosition.y, cubePosition.z  + (float)i}, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires((Vector3){cubePosition.x + (float)i2, cubePosition.y, cubePosition.z  + (float)i}, 2.0f, 2.0f, 2.0f, BLACK); 
@@ -390,10 +375,6 @@ int main(int argc, char* argv[]){
     float test[] = {1.2};
     serialize_array(test, sizeof(test[0]), 1, "test.bin");
     serialize_block_array(blockArray, "blockArray.bin");
-    emptyBlockArray(blockArray);
-    /*for (int y = 0; y < height; y++){
-    free(elevation[y]);
-    }*/
     }
 #endif
 

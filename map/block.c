@@ -32,7 +32,7 @@ Block* createBlock(BlockArray* blockArray, float x, float y, float z){
     tempBlock->x = x;
     tempBlock->y = y;
     tempBlock->z = z;
-    addToBlockArray(blockArray, *tempBlock);
+    //addToBlockArray(blockArray, *tempBlock);
     //Model tempCube = LoadModelFromMesh(GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE));
     //DrawModel(tempCube, (Vector3){x, y, z}, 1,RED);
     DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);

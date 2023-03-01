@@ -1,15 +1,15 @@
-CC      = gcc
-CFLAGS  = -Wall
+CC      = g++
+CFLAGS  = -Wall -g
 LDFLAGS =
 
-SRCS := $(wildcard *.c)
-OBJS = $(patsubst %.c,%.o,$(SRCS))
+SRCS := $(wildcard *.cpp)
+OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
 .PHONY: all clean
 
 all: clean libnoise.a
 
-%.o: %.c
+%.o: %.cpp
 	$(CC) -o $@ $^ -c $(CFLAGS) $(LDFLAGS)
 
 libnoise.a: $(OBJS)
