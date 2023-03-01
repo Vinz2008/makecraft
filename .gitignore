@@ -7,3 +7,4 @@ makecraft
 raylib/
 log.txt
 log*
+*.bin

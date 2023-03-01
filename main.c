@@ -29,6 +29,7 @@
 #endif
 #include "map/chunk.h"
 #include "map/block.h"
+#include "map/serialize.h"
 #include "noise/noise.h"
 
 #if defined(PLATFORM_DESKTOP)
@@ -386,6 +387,9 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - 10.0f, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
+    float test[] = {1.2};
+    serialize_array(test, sizeof(test[0]), 1, "test.bin");
+    serialize_block_array(blockArray, "blockArray.bin");
     emptyBlockArray(blockArray);
     /*for (int y = 0; y < height; y++){
     free(elevation[y]);
