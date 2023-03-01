@@ -8,3 +8,4 @@ raylib/
 log.txt
 log*
 *.bin
+*.txt
