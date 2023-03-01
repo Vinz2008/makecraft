@@ -30,6 +30,8 @@
 #include <vector>
 #include "map/chunk.h"
 #include "map/block.h"
+#include "map/generation.h"
+#include "map/water.h"
 #include "map/serialize.h"
 #include "noise/noise2.h"
 
@@ -95,6 +97,7 @@ static Vector3 movement = {0, -0.2f, 0};
 static Vector3 rotation;
 Texture2D DirtTexture;
 Texture2D StoneTexture;
+Texture2D WaterTexture;
 Shader shader;
 
 Vector3* cubeArrayPos;
@@ -142,12 +145,9 @@ int main(int argc, char* argv[]){
     initBlockArray(blockArray, NB_BLOCK_NOISE);
     for (int x = 0; x < NB_BLOCK_NOISE; x++){
         for (int y = 0; y < NB_BLOCK_NOISE; y++){
-        int z = get_noise_data(farray, x, y, NB_BLOCK_NOISE);
-        int texture = dirt_texture;
-        if (z < 10 || z > 30){
-            texture = stone_texture;
-        }
-        addToBlockArray(blockArray, (Block){x, y, z, texture});
+        float z = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
+        int texture = get_block_type(z);
+        addToBlockArray(blockArray, (Block){x*2.0f, z*2.0f, y*2.0f, texture});
     }
     }
     printf("blockArraysize : %d\n", blockArray->used);
@@ -195,9 +195,11 @@ int main(int argc, char* argv[]){
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
     Image DirtTextureMap = LoadImage("textures/dirt.png");
     Image StoneTextureMap = LoadImage("textures/stone.png");
+    Image WaterTextureMap = LoadImage("textures/water.png");
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
     StoneTexture = LoadTextureFromImage(StoneTextureMap);
-    Rectangle textBox = {10, 10,  screenWidth/10, screenHeight/5};
+    WaterTexture = LoadTextureFromImage(WaterTextureMap);
+    Rectangle textBox = {10, 10,  screenWidth/1.1, screenHeight/1.1};
     Ray ray = { 0 };
     RayCollision collision = { 0 };
     float** elevation;
@@ -220,6 +222,7 @@ int main(int argc, char* argv[]){
     lastMousePos = GetMousePosition();
     bool exitWindow = false;
     bool showHUD = false;
+    int pos_hud = 0;
     SetExitKey(0);
 
     // Main game loop
@@ -227,9 +230,9 @@ int main(int argc, char* argv[]){
         //UpdateCamera(&camera);
         if (IsKeyPressed(KEY_V) || WindowShouldClose()) exitWindow = true;
         if (IsKeyPressed(KEY_ESCAPE)){
-            showHUD = (showHUD == true) ? false : true;
+            showHUD = (showHUD) ? false : true;
             printf("showHUD : %d\n", showHUD);
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            //SetMouseCursor(MOUSE_CURSOR_ARROW);
         }
         /*if (CheckCollisionPointRec(GetMousePosition(), textBox) && showHUD == true) mouseOnText = true;
         else mouseOnText = false;
@@ -260,6 +263,7 @@ int main(int argc, char* argv[]){
 
         if (mouseOnText) framesCounter++;
         else framesCounter = 0;*/
+        if (!showHUD){
         Vector2 mouseMovement = Vector2Subtract(GetMousePosition(), lastMousePos);
         rotation.x += (mouseMovement.x*-CAMERA_MOUSE_MOVE_SENSITIVITY);
         rotation.y += (mouseMovement.y*-CAMERA_MOUSE_MOVE_SENSITIVITY);
@@ -283,6 +287,7 @@ int main(int argc, char* argv[]){
             movement.y -= 0.12f;
         if (IsKeyDown(KEY_SPACE))
             movement.y += 0.12f;
+
         
         movement.y -= 0.06f;
 
@@ -303,7 +308,12 @@ int main(int argc, char* argv[]){
         player.camera.target.z = player.camera.position.z - transform.m14;
 
         isPlayerInCollisionWithArrayBlock(player, *blockArray);
-
+        if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)){
+            ray = GetMouseRay(GetMousePosition(), player.camera);
+            for (int i = 0; i < blockArray->used; i++){
+                
+            }
+        }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
             if (!collision.hit){
@@ -314,21 +324,21 @@ int main(int argc, char* argv[]){
             }
             else collision.hit = false;
         }    
-        
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        if (showHUD == true){
-            DrawRectangleRec(textBox, LIGHTGRAY);
-            if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
-            else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
-            DrawText(filename_lua, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
-            if (mouseOnText){
-                if (letterCount < 9){
-                    if (((framesCounter/20)%2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(filename_lua, 40), (int)textBox.y + 12, 40, MAROON);
+        } else {
+            if (IsKeyPressed(KEY_UP)){
+                pos_hud = (pos_hud-1 < 0) ? 1 : pos_hud-1;
+            } else if (IsKeyPressed(KEY_DOWN)){
+                pos_hud = (pos_hud+1 > 1) ? 0 : pos_hud+1;
+            } else if (IsKeyPressed(KEY_ENTER)){
+                if (pos_hud == 0){
+                    showHUD = false;
+                } else if (pos_hud == 1){
+                     exitWindow = true;
                 }
-                else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
             }
         }
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
 
         BeginMode3D(player.camera);
             DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY);
@@ -341,14 +351,19 @@ int main(int argc, char* argv[]){
                 for (float y = 0; y < NB_BLOCK_NOISE; y++){
                     float znoise = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
                     float mult = 2.0f;
-                    int texture = dirt_texture;
-                    if (znoise < 5 || znoise > 10){
-                        texture = stone_texture;
+                    int texture = get_block_type(znoise);
+                    if (znoise < 17){
+                    createWater(blockArray, x, y, znoise+0.1, 10);
                     }
                     //printf("create block x %f, y %f, z %f\n", x*mult, znoise*mult, y*mult);
-                    Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult, texture);
+                    //Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult, texture);
                     //addToBlockArray(blockArray, *tempBlock);
                 }
+            }
+
+            for (int i = 0; i < blockArray->used; i++){
+                Block blocktemp = blockArray->blockArray[i];
+                createBlock(blockArray, blocktemp.x, blocktemp.y, blocktemp.z, blocktemp.material);
             }
 
 
@@ -372,6 +387,22 @@ int main(int argc, char* argv[]){
         DrawLine(screenWidth/2, screenHeight/2, screenWidth/2 , screenHeight/2 - screenHeight/20, GRAY);
         DrawLine(screenWidth/2 - screenWidth/40, screenHeight/2 - screenHeight/40, screenWidth/2 + screenWidth/40, screenHeight/2 - screenHeight/40, GRAY);
         DrawFPS(10, 10);
+        if (showHUD == true){
+            DrawRectangleRec(textBox, LIGHTGRAY);
+            if (mouseOnText) DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, RED);
+            else DrawRectangleLines((int)textBox.x, (int)textBox.y, (int)textBox.width, (int)textBox.height, DARKGRAY);
+            DrawText(filename_lua, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+            if (mouseOnText){
+                if (letterCount < 9){
+                    if (((framesCounter/20)%2) == 0) DrawText("_", (int)textBox.x + 8 + MeasureText(filename_lua, 40), (int)textBox.y + 12, 40, MAROON);
+                }
+                else DrawText("Press BACKSPACE to delete chars...", 230, 300, 20, GRAY);
+            }
+            DrawRectangle(screenWidth/4, screenHeight/4, screenWidth/8, screenHeight/8, (pos_hud == 0) ? BLACK : WHITE );
+            DrawText("Continue", screenWidth/4, screenHeight/4, 25, GRAY);
+            DrawRectangle(screenWidth/4, screenHeight/2, screenWidth/8, screenHeight/8, (pos_hud == 1) ? BLACK : WHITE);
+            DrawText("Exit", screenWidth/4, screenHeight/2, 25, GRAY);
+        }
         
 
     EndDrawing();

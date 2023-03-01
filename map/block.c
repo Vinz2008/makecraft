@@ -7,6 +7,7 @@
 
 extern Texture2D DirtTexture;
 extern Texture2D StoneTexture;
+extern Texture2D WaterTexture;
 
 void initBlockArray(BlockArray* blockArray, size_t initalSize){
     blockArray->blockArray = malloc(sizeof(Block) * initalSize);
@@ -44,6 +45,8 @@ Block* createBlock(BlockArray* blockArray, float x, float y, float z, int textur
         texture2dBlock = &DirtTexture;
     }  else if (texture == stone_texture){
         texture2dBlock = &StoneTexture;
+    } else if (texture == water_texture){
+        texture2dBlock = &WaterTexture;
     }
     DrawCubeTexture(*texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , WHITE);
     return tempBlock;
