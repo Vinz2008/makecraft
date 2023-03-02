@@ -102,6 +102,8 @@ Shader shader;
 
 Vector3* cubeArrayPos;
 
+int mode = creative_mode;
+
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
@@ -121,9 +123,27 @@ bool isPlayerInCollisionWithBlock(Player player, Block block){
 }
 
 
-bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray blockArray){
-    for (int i = 0; i < blockArray.used; i++) {
-        if (isPlayerInCollisionWithBlock(player, blockArray.blockArray[i])){
+bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray* blockArray){
+    for (int i = 0; i < blockArray->used; i++) {
+        if (isPlayerInCollisionWithBlock(player, blockArray->blockArray[i])){
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isPlayerOnTopOfBlock(Player player, Block block){
+    if (isNumberAround(player.camera.position.x, block.x, 1.0f) && isNumberAround(player.camera.position.y, block.y, 4.0f) && isNumberAround(player.camera.position.z, block.z, 1.0f)){
+        printf("on top\n");
+        return true;
+    }
+    return false;
+}
+
+
+bool isPlayerOnTopOfBlockArray(Player player, BlockArray* blockArray){
+    for (int i = 0; i < blockArray->used; i++) {
+        if (isPlayerOnTopOfBlock(player, blockArray->blockArray[i])){
             return true;
         }
     }
@@ -282,14 +302,19 @@ int main(int argc, char* argv[]){
                       cosf(rotation.x)*direction[0] +
                       sinf(rotation.x)*direction[3] -
                       sinf(rotation.x)*direction[2])/PLAYER_MOVEMENT_SENSITIVITY;
-
-        if (IsKeyDown(KEY_LEFT_SHIFT))
-            movement.y -= 0.12f;
-        if (IsKeyDown(KEY_SPACE))
-            movement.y += 0.12f;
-
         
-        movement.y -= 0.06f;
+        if (mode == creative_mode){
+        if (IsKeyDown(KEY_LEFT_SHIFT))
+            movement.y -= 0.30f;
+        if (IsKeyDown(KEY_SPACE))
+            movement.y += 0.30f;
+        } else {
+        if (IsKeyDown(KEY_SPACE))
+            movement.y += 0.30f;
+        if (!isPlayerOnTopOfBlockArray(player, blockArray)){
+            movement.y -= 0.17f;   
+        }
+        }
 
         player.camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
 
@@ -307,14 +332,17 @@ int main(int argc, char* argv[]){
         player.camera.target.y = player.camera.position.y - transform.m13;
         player.camera.target.z = player.camera.position.z - transform.m14;
 
-        isPlayerInCollisionWithArrayBlock(player, *blockArray);
         if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)){
             ray = GetMouseRay(GetMousePosition(), player.camera);
+            Mesh MeshCube = GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
             for (int i = 0; i < blockArray->used; i++){
-                
+                RayCollision collision = GetRayCollisionMesh(ray, MeshCube, MatrixTranslate(blockArray->blockArray[i].x, blockArray->blockArray[i].y, blockArray->blockArray[i].z));
+                if (collision.hit){
+                    printf("ray collide with cube\n");
+                }
             }
         }
-
+        
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
             if (!collision.hit){
                 ray = GetMouseRay(GetMousePosition(), player.camera);
@@ -324,15 +352,20 @@ int main(int argc, char* argv[]){
             }
             else collision.hit = false;
         }    
+
+
+
         } else {
             if (IsKeyPressed(KEY_UP)){
-                pos_hud = (pos_hud-1 < 0) ? 1 : pos_hud-1;
+                pos_hud = (pos_hud-1 < 0) ? NUMBER_BUTTON_MENU-1 : pos_hud-1;
             } else if (IsKeyPressed(KEY_DOWN)){
-                pos_hud = (pos_hud+1 > 1) ? 0 : pos_hud+1;
+                pos_hud = (pos_hud+1 > NUMBER_BUTTON_MENU-1) ? 0 : pos_hud+1;
             } else if (IsKeyPressed(KEY_ENTER)){
                 if (pos_hud == 0){
                     showHUD = false;
                 } else if (pos_hud == 1){
+                    mode = (mode == creative_mode) ? survival_mode : creative_mode;
+                } else if (pos_hud == 2){
                      exitWindow = true;
                 }
             }
@@ -353,7 +386,7 @@ int main(int argc, char* argv[]){
                     float mult = 2.0f;
                     int texture = get_block_type(znoise);
                     if (znoise < 17){
-                    createWater(blockArray, x, y, znoise+0.1, 10);
+                    createWater(blockArray, x*2.0f, y*2.0f, znoise+0.1, 10);
                     }
                     //printf("create block x %f, y %f, z %f\n", x*mult, znoise*mult, y*mult);
                     //Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult, texture);
@@ -400,8 +433,10 @@ int main(int argc, char* argv[]){
             }
             DrawRectangle(screenWidth/4, screenHeight/4, screenWidth/8, screenHeight/8, (pos_hud == 0) ? BLACK : WHITE );
             DrawText("Continue", screenWidth/4, screenHeight/4, 25, GRAY);
-            DrawRectangle(screenWidth/4, screenHeight/2, screenWidth/8, screenHeight/8, (pos_hud == 1) ? BLACK : WHITE);
-            DrawText("Exit", screenWidth/4, screenHeight/2, 25, GRAY);
+            DrawRectangle(screenWidth/4, screenHeight/2.5, screenWidth/8, screenHeight/8, (pos_hud == 1) ? BLACK : WHITE);
+            DrawText("Change Mode", screenWidth/4, screenHeight/2.5, 25, GRAY);
+            DrawRectangle(screenWidth/4, screenHeight/1.75, screenWidth/8, screenHeight/8, (pos_hud == 2) ? BLACK : WHITE);
+            DrawText("Exit", screenWidth/4, screenHeight/1.75, 25, GRAY);
         }
         
 

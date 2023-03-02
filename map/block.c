@@ -41,13 +41,16 @@ Block* createBlock(BlockArray* blockArray, float x, float y, float z, int textur
     //DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
     DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
     Texture2D* texture2dBlock = NULL;
+    Color col = WHITE;
     if (texture == dirt_texture){
         texture2dBlock = &DirtTexture;
     }  else if (texture == stone_texture){
         texture2dBlock = &StoneTexture;
     } else if (texture == water_texture){
         texture2dBlock = &WaterTexture;
+        col = CLITERAL(Color){ 255, 255, 255, 200 };
     }
-    DrawCubeTexture(*texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , WHITE);
+
+    DrawCubeTexture(*texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , col);
     return tempBlock;
 }
