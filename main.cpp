@@ -16,6 +16,9 @@
 #include <limits.h>
 #include "raylib.h"
 #include "raymath.h"
+#define CAMERA_IMPLEMENTATION
+#define CAMERA_STANDALONE_WITH_RAYLIB
+#include "rcamera.h"
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
 #include "lib/startswith.h"
@@ -49,6 +52,7 @@
 
 #define PLAYER_MOVEMENT_SENSITIVITY 1.5
 #define CAMERA_MOUSE_MOVE_SENSITIVITY 0.001f
+#define CAMERA_MOVE_SPEED  0.5f
 
 #define PLAYER_HEIGHT 5.0f
 
@@ -284,9 +288,9 @@ int main(int argc, char* argv[]){
         if (mouseOnText) framesCounter++;
         else framesCounter = 0;*/
         if (!showHUD){
-        Vector2 mouseMovement = Vector2Subtract(GetMousePosition(), lastMousePos);
-        rotation.x += (mouseMovement.x*-CAMERA_MOUSE_MOVE_SENSITIVITY);
-        rotation.y += (mouseMovement.y*-CAMERA_MOUSE_MOVE_SENSITIVITY);
+        /*Vector2 mouseMovement = Vector2Subtract(GetMousePosition(), lastMousePos);
+        rotation.x += (mouseMovement.x*CAMERA_MOUSE_MOVE_SENSITIVITY);
+        rotation.y += (mouseMovement.y*CAMERA_MOUSE_MOVE_SENSITIVITY);
         lastMousePos = GetMousePosition();
         float direction[] = { IsKeyDown(KEY_W),
                               IsKeyDown(KEY_S),
@@ -301,22 +305,45 @@ int main(int argc, char* argv[]){
         movement.z = (cosf(rotation.x)*direction[1] -
                       cosf(rotation.x)*direction[0] +
                       sinf(rotation.x)*direction[3] -
-                      sinf(rotation.x)*direction[2])/PLAYER_MOVEMENT_SENSITIVITY;
-        
+                      sinf(rotation.x)*direction[2])/PLAYER_MOVEMENT_SENSITIVITY;*/
+        Vector2 mousePositionDelta = GetMouseDelta();
+        bool moveInWorldPlane = true;
+        bool lockView = true;
+        bool rotateAroundTarget = false;
+        bool rotateUp = false;
+        if (IsKeyDown(KEY_DOWN)) CameraPitch(&player.camera, -CAMERA_ROTATION_SPEED, lockView, rotateAroundTarget, rotateUp);
+        if (IsKeyDown(KEY_UP)) CameraPitch(&player.camera, CAMERA_ROTATION_SPEED, lockView, rotateAroundTarget, rotateUp);
+        if (IsKeyDown(KEY_RIGHT)) CameraYaw(&player.camera, -CAMERA_ROTATION_SPEED, rotateAroundTarget);
+        if (IsKeyDown(KEY_LEFT)) CameraYaw(&player.camera, CAMERA_ROTATION_SPEED, rotateAroundTarget);
+        if (IsKeyDown(KEY_Q)) CameraRoll(&player.camera, -CAMERA_ROTATION_SPEED);
+        if (IsKeyDown(KEY_E)) CameraRoll(&player.camera, CAMERA_ROTATION_SPEED);
+
+        CameraYaw(&player.camera, -mousePositionDelta.x*CAMERA_MOUSE_MOVE_SENSITIVITY, rotateAroundTarget);
+        CameraPitch(&player.camera, -mousePositionDelta.y*CAMERA_MOUSE_MOVE_SENSITIVITY, lockView, rotateAroundTarget, rotateUp);
+  
+        // Camera movement
+        if (IsKeyDown(KEY_W)) CameraMoveForward(&player.camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+        if (IsKeyDown(KEY_A)) CameraMoveRight(&player.camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
+        if (IsKeyDown(KEY_S)) CameraMoveForward(&player.camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
+        if (IsKeyDown(KEY_D)) CameraMoveRight(&player.camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
+        //if (IsKeyDown(KEY_SPACE)) CameraMoveUp(camera, CAMERA_MOVE_SPEED);
+        //if (IsKeyDown(KEY_LEFT_CONTROL)) CameraMoveUp(camera, -CAMERA_MOVE_SPEED);              
         if (mode == creative_mode){
         if (IsKeyDown(KEY_LEFT_SHIFT))
-            movement.y -= 0.30f;
+            //movement.y -= 0.30f;
+            CameraMoveUp(&player.camera, -0.30f);
         if (IsKeyDown(KEY_SPACE))
-            movement.y += 0.30f;
+            //movement.y += 0.30f;
+            CameraMoveUp(&player.camera, 0.30f);
         } else {
         if (IsKeyDown(KEY_SPACE))
-            movement.y += 0.30f;
+            CameraMoveUp(&player.camera, 0.30f);
         if (!isPlayerOnTopOfBlockArray(player, blockArray)){
-            movement.y -= 0.17f;   
+            CameraMoveUp(&player.camera, -0.17f); 
         }
         }
 
-        player.camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
+        /*player.camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
 
         player.camera.position.y += movement.y;
 
@@ -330,7 +357,7 @@ int main(int argc, char* argv[]){
 
         player.camera.target.x = player.camera.position.x - transform.m12;
         player.camera.target.y = player.camera.position.y - transform.m13;
-        player.camera.target.z = player.camera.position.z - transform.m14;
+        player.camera.target.z = player.camera.position.z - transform.m14;*/
 
         if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)){
             ray = GetMouseRay(GetMousePosition(), player.camera);
