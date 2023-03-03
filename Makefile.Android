@@ -23,7 +23,7 @@
 
 # Define required raylib variables
 PLATFORM               ?= PLATFORM_ANDROID
-RAYLIB_PATH            ?= ..\..
+RAYLIB_PATH            ?= ~/raylib-android
 
 # Define Android architecture (armeabi-v7a, arm64-v8a, x86, x86-64) and API version
 ANDROID_ARCH           ?= ARM
@@ -44,16 +44,16 @@ ANDROID_BUILD_TOOLS     = $(ANDROID_HOME)/build-tools/28.0.1
 ANDROID_PLATFORM_TOOLS  = $(ANDROID_HOME)/platform-tools
 
 # Android project configuration variables
-PROJECT_NAME           ?= raylib_game
+PROJECT_NAME           ?= makecraft
 PROJECT_LIBRARY_NAME   ?= main
 PROJECT_BUILD_PATH     ?= android.$(PROJECT_NAME)
 PROJECT_RESOURCES_PATH ?= resources
-PROJECT_SOURCE_FILES   ?= raylib_game.c
+PROJECT_SOURCE_FILES   ?= main.cpp
 
 # Some source files are placed in directories, when compiling to some 
 # output directory other than source, that directory must pre-exist.
 # Here we get a list of required folders that need to be created on
-# code output folder $(PROJECT_BUILD_PATH)\obj to avoid GCC errors.
+# code output folder $(PROJECT_BUILD_PATH)/obj to avoid GCC errors.
 PROJECT_SOURCE_DIRS = $(sort $(dir $(PROJECT_SOURCE_FILES)))
 
 # Android app configuration variables
@@ -62,9 +62,9 @@ APP_COMPANY_NAME ?= raylib
 APP_PRODUCT_NAME ?= rgame
 APP_VERSION_CODE ?= 1
 APP_VERSION_NAME ?= 1.0
-APP_ICON_LDPI ?= $(RAYLIB_PATH)\logo\raylib_36x36.png
-APP_ICON_MDPI ?= $(RAYLIB_PATH)\logo\raylib_48x48.png
-APP_ICON_HDPI ?= $(RAYLIB_PATH)\logo\raylib_72x72.png
+APP_ICON_LDPI ?= ./logo/raylib_36x36.png
+APP_ICON_MDPI ?= ./logo/raylib_48x48.png
+APP_ICON_HDPI ?= ./logo/raylib_72x72.png
 APP_SCREEN_ORIENTATION ?= landscape
 APP_KEYSTORE_PASS ?= raylib
 
@@ -72,7 +72,7 @@ APP_KEYSTORE_PASS ?= raylib
 RAYLIB_LIBTYPE ?= STATIC
 
 # Library path for libraylib.a/libraylib.so
-RAYLIB_LIB_PATH = $(RAYLIB_PATH)\src
+RAYLIB_LIB_PATH = $(RAYLIB_PATH)
 
 # Shared libs must be added to APK if required
 # NOTE: Generated NativeLoader.java automatically load those libraries
@@ -114,7 +114,7 @@ LDFLAGS += -Wl,--build-id -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl
 # Force linking of library module to define symbol
 LDFLAGS += -u ANativeActivity_onCreate
 # Library paths containing required libs
-LDFLAGS += -L. -L$(PROJECT_BUILD_PATH)/obj -L$(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME) -L$(ANDROID_TOOLCHAIN)\sysroot\usr\lib
+LDFLAGS += -L. -L$(PROJECT_BUILD_PATH)/obj -L$(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME) -L$(ANDROID_TOOLCHAIN)/sysroot/usr/lib
 
 # Define any libraries to link into executable
 # if you want to link libraries (libname.so or libname.a), use the -lname
@@ -141,49 +141,70 @@ all: create_temp_project_dirs \
 
 # Create required temp directories for APK building
 create_temp_project_dirs:
+ifeq ($(PLATFORM_OS),WINDOWS)
 	if not exist $(PROJECT_BUILD_PATH) mkdir $(PROJECT_BUILD_PATH) 
-	if not exist $(PROJECT_BUILD_PATH)\obj mkdir $(PROJECT_BUILD_PATH)\obj
-	if not exist $(PROJECT_BUILD_PATH)\src mkdir $(PROJECT_BUILD_PATH)\src
-	if not exist $(PROJECT_BUILD_PATH)\src\com mkdir $(PROJECT_BUILD_PATH)\src\com
-	if not exist $(PROJECT_BUILD_PATH)\src\com\$(APP_COMPANY_NAME) mkdir $(PROJECT_BUILD_PATH)\src\com\$(APP_COMPANY_NAME)
-	if not exist $(PROJECT_BUILD_PATH)\src\com\$(APP_COMPANY_NAME)\$(APP_PRODUCT_NAME) mkdir $(PROJECT_BUILD_PATH)\src\com\$(APP_COMPANY_NAME)\$(APP_PRODUCT_NAME)
-	if not exist $(PROJECT_BUILD_PATH)\lib mkdir $(PROJECT_BUILD_PATH)\lib
-	if not exist $(PROJECT_BUILD_PATH)\lib\$(ANDROID_ARCH_NAME) mkdir $(PROJECT_BUILD_PATH)\lib\$(ANDROID_ARCH_NAME)
-	if not exist $(PROJECT_BUILD_PATH)\bin mkdir $(PROJECT_BUILD_PATH)\bin
-	if not exist $(PROJECT_BUILD_PATH)\res mkdir $(PROJECT_BUILD_PATH)\res
-	if not exist $(PROJECT_BUILD_PATH)\res\drawable-ldpi mkdir $(PROJECT_BUILD_PATH)\res\drawable-ldpi
-	if not exist $(PROJECT_BUILD_PATH)\res\drawable-mdpi mkdir $(PROJECT_BUILD_PATH)\res\drawable-mdpi
-	if not exist $(PROJECT_BUILD_PATH)\res\drawable-hdpi mkdir $(PROJECT_BUILD_PATH)\res\drawable-hdpi
-	if not exist $(PROJECT_BUILD_PATH)\res\values mkdir $(PROJECT_BUILD_PATH)\res\values
-	if not exist $(PROJECT_BUILD_PATH)\assets mkdir $(PROJECT_BUILD_PATH)\assets
-	if not exist $(PROJECT_BUILD_PATH)\assets\$(PROJECT_RESOURCES_PATH) mkdir $(PROJECT_BUILD_PATH)\assets\$(PROJECT_RESOURCES_PATH)
-	if not exist $(PROJECT_BUILD_PATH)\obj\screens mkdir $(PROJECT_BUILD_PATH)\obj\screens
+	if not exist $(PROJECT_BUILD_PATH)/obj mkdir $(PROJECT_BUILD_PATH)/obj
+	if not exist $(PROJECT_BUILD_PATH)/src mkdir $(PROJECT_BUILD_PATH)/src
+	if not exist $(PROJECT_BUILD_PATH)/src/com mkdir $(PROJECT_BUILD_PATH)/src/com
+	if not exist $(PROJECT_BUILD_PATH)/src/com/$(APP_COMPANY_NAME) mkdir $(PROJECT_BUILD_PATH)/src/com/$(APP_COMPANY_NAME)
+	if not exist $(PROJECT_BUILD_PATH)/src/com/$(APP_COMPANY_NAME)/$(APP_PRODUCT_NAME) mkdir $(PROJECT_BUILD_PATH)/src/com/$(APP_COMPANY_NAME)/$(APP_PRODUCT_NAME)
+	if not exist $(PROJECT_BUILD_PATH)/lib mkdir $(PROJECT_BUILD_PATH)/lib
+	if not exist $(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME) mkdir $(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME)
+	if not exist $(PROJECT_BUILD_PATH)/bin mkdir $(PROJECT_BUILD_PATH)/bin
+	if not exist $(PROJECT_BUILD_PATH)/res mkdir $(PROJECT_BUILD_PATH)/res
+	if not exist $(PROJECT_BUILD_PATH)/res/drawable-ldpi mkdir $(PROJECT_BUILD_PATH)/res/drawable-ldpi
+	if not exist $(PROJECT_BUILD_PATH)/res/drawable-mdpi mkdir $(PROJECT_BUILD_PATH)/res/drawable-mdpi
+	if not exist $(PROJECT_BUILD_PATH)/res/drawable-hdpi mkdir $(PROJECT_BUILD_PATH)/res/drawable-hdpi
+	if not exist $(PROJECT_BUILD_PATH)/res/values mkdir $(PROJECT_BUILD_PATH)/res/values
+	if not exist $(PROJECT_BUILD_PATH)/assets mkdir $(PROJECT_BUILD_PATH)/assets
+	if not exist $(PROJECT_BUILD_PATH)/assets/$(PROJECT_RESOURCES_PATH) mkdir $(PROJECT_BUILD_PATH)/assets/$(PROJECT_RESOURCES_PATH)
+	if not exist $(PROJECT_BUILD_PATH)/obj/screens mkdir $(PROJECT_BUILD_PATH)/obj/screens
 	$(foreach dir, $(PROJECT_SOURCE_DIRS), $(call create_dir, $(dir)))
+else
+	mkdir -p $(PROJECT_BUILD_PATH) 
+	mkdir -p $(PROJECT_BUILD_PATH)/src
+	mkdir -p $(PROJECT_BUILD_PATH)/src/com
+	mkdir -p $(PROJECT_BUILD_PATH)/src/com/$(APP_COMPANY_NAME)
+	mkdir -p $(PROJECT_BUILD_PATH)/src/com/$(APP_PRODUCT_NAME)
+	mkdir -p $(PROJECT_BUILD_PATH)/lib
+	mkdir -p $(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME)
+	mkdir -p $(PROJECT_BUILD_PATH)/bin
+	mkdir -p $(PROJECT_BUILD_PATH)/res
+	mkdir -p $(PROJECT_BUILD_PATH)/resdrawable-ldpi
+	mkdir -p $(PROJECT_BUILD_PATH)/res/drawable-mdpi
+	mkdir -p $(PROJECT_BUILD_PATH)/res/drawable-hdpi
+	mkdir -p $(PROJECT_BUILD_PATH)/res/values
+	mkdir -p $(PROJECT_BUILD_PATH)/assets
+	mkdir -p $(PROJECT_BUILD_PATH)/assets/$(PROJECT_RESOURCES_PATH)
+	mkdir -p $(PROJECT_BUILD_PATH)/objs/screens
+
+	
+endif
 
 define create_dir
-    if not exist $(PROJECT_BUILD_PATH)\obj\$(1) mkdir $(PROJECT_BUILD_PATH)\obj\$(1)
+    if not exist $(PROJECT_BUILD_PATH)/obj/$(1) mkdir $(PROJECT_BUILD_PATH)/obj/$(1)
 endef
     
 # Copy required shared libs for integration into APK
 # NOTE: If using shared libs they are loaded by generated NativeLoader.java
 copy_project_required_libs:
 ifeq ($(RAYLIB_LIBTYPE),SHARED)
-	copy /Y $(RAYLIB_LIB_PATH)\libraylib.so $(PROJECT_BUILD_PATH)\lib\$(ANDROID_ARCH_NAME)\libraylib.so 
+	cp $(RAYLIB_LIB_PATH)/libraylib.so $(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME)/libraylib.so 
 endif
 ifeq ($(RAYLIB_LIBTYPE),STATIC)
-	copy /Y $(RAYLIB_LIB_PATH)\libraylib.a $(PROJECT_BUILD_PATH)\lib\$(ANDROID_ARCH_NAME)\libraylib.a 
+	cp $(RAYLIB_LIB_PATH)/libraylib.a $(PROJECT_BUILD_PATH)/lib/$(ANDROID_ARCH_NAME)/libraylib.a 
 endif
 
 # Copy project required resources: strings.xml, icon.png, assets
 # NOTE: Required strings.xml is generated and game resources are copied to assets folder
 # TODO: Review xcopy usage, it can not be found in some systems!
 copy_project_resources:
-	copy $(APP_ICON_LDPI) $(PROJECT_BUILD_PATH)\res\drawable-ldpi\icon.png /Y
-	copy $(APP_ICON_MDPI) $(PROJECT_BUILD_PATH)\res\drawable-mdpi\icon.png /Y
-	copy $(APP_ICON_HDPI) $(PROJECT_BUILD_PATH)\res\drawable-hdpi\icon.png /Y
+	cp $(APP_ICON_LDPI) $(PROJECT_BUILD_PATH)/res/drawable-ldpi/icon.png
+	cp $(APP_ICON_MDPI) $(PROJECT_BUILD_PATH)/res/drawable-mdpi/icon.png
+	cp $(APP_ICON_HDPI) $(PROJECT_BUILD_PATH)/res/drawable-hdpi/icon.png
 	@echo ^<?xml version="1.0" encoding="utf-8"^?^> > $(PROJECT_BUILD_PATH)/res/values/strings.xml
 	@echo ^<resources^>^<string name="app_name"^>$(APP_LABEL_NAME)^</string^>^</resources^> >> $(PROJECT_BUILD_PATH)/res/values/strings.xml
-	if exist $(PROJECT_RESOURCES_PATH) C:\Windows\System32\xcopy $(PROJECT_RESOURCES_PATH) $(PROJECT_BUILD_PATH)\assets\$(PROJECT_RESOURCES_PATH) /Y /E /F
+	if exist $(PROJECT_RESOURCES_PATH) C:/Windows/System32/xcopy $(PROJECT_RESOURCES_PATH) $(PROJECT_BUILD_PATH)/assets/$(PROJECT_RESOURCES_PATH) /Y /E /F
 
 # Generate NativeLoader.java to load required shared libraries
 # NOTE: Probably not the bet way to generate this file... but it works.
@@ -295,6 +316,6 @@ deploy:
 
 # Clean everything
 clean:
-	del $(PROJECT_BUILD_PATH)\* /f /s /q
+	del $(PROJECT_BUILD_PATH)/* /f /s /q
 	rmdir $(PROJECT_BUILD_PATH) /s /q
 	@echo Cleaning done

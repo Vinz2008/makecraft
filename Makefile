@@ -209,7 +209,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     endif
 endif
 ifeq ($(PLATFORM),PLATFORM_ANDROID)
-    MAKE = mingw32-make
+    MAKE = make
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
     MAKE = make
