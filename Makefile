@@ -68,10 +68,10 @@ USE_EXTERNAL_GLFW     ?= FALSE
 USE_WAYLAND_DISPLAY   ?= FALSE
 
 BUILD_WEB_ASYNCIFY    ?= TRUE
-BUILD_WEB_SHELL       ?= $(RAYLIB_PATH)/src/minshell.html
+BUILD_WEB_SHELL       ?= ./web/minshell.html
 BUILD_WEB_HEAP_SIZE   ?= 134217728
 BUILD_WEB_RESOURCES   ?= TRUE
-BUILD_WEB_RESOURCES_PATH  ?= $(dir $<)resources@resources
+BUILD_WEB_RESOURCES_PATH  ?= textures
 
 # Use cross-compiler for PLATFORM_RPI
 ifeq ($(PLATFORM),PLATFORM_RPI)
@@ -197,7 +197,7 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
     # HTML5 emscripten compiler
     # WARNING: To compile to HTML5, code must be redesigned 
     # to use emscripten.h and emscripten_set_main_loop()
-    CC = emcc
+    CC = em++
 endif
 
 # Define default make program: Mingw32-make
@@ -212,7 +212,7 @@ ifeq ($(PLATFORM),PLATFORM_ANDROID)
     MAKE = mingw32-make
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
-    MAKE = mingw32-make
+    MAKE = make
 endif
 
 # Define compiler flags:
@@ -290,6 +290,10 @@ ifeq ($(PLATFORM),PLATFORM_RPI)
 endif
 ifeq ($(PLATFORM),PLATFORM_DRM)
     INCLUDE_PATHS += -I/usr/include/libdrm
+endif
+ifeq ($(PLATFORM),PLATFORM_WEB)
+	INCLUDE_PATHS  += -I/usr/include
+	CFLAGS += -std=c++14
 endif
 
 # Define library paths containing required libs.
@@ -426,17 +430,21 @@ ifeq ($(PLATFORM),PLATFORM_DRM)
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
     # Libraries for web (HTML5) compiling
-    LDLIBS = $(RAYLIB_RELEASE_PATH)/libraylib.a
+    LDLIBS = ~/raylib-web/libraylib.a
 endif
 
-
+ifneq ($(PLATFORM),PLATFORM_WEB)
 LDLIBS += noise/libnoise.a
-LDLIBS += lib/misc.a
-LDLIBS += -llua -lm
 LDLIBS += lua_api/liblua_api.a
+endif
+LDLIBS += lib/misc.a
 LDLIBS += map/libmap.a
+
+ifneq ($(PLATFORM),PLATFORM_WEB)
+LDLIBS += -llua -lm
 LDLIBS += -lnoise 
 LDLIBS += -lFastNoise
+endif
 
 
 
@@ -464,7 +472,7 @@ ifeq ($(PLATFORM),PLATFORM_ANDROID)
 else
     MAKEFILE_PARAMS = $(PROJECT_NAME)
 endif
-
+export
 # Default target entry
 # NOTE: We call this Makefile target or Makefile.Android target
 all: clean
@@ -483,7 +491,6 @@ $(PROJECT_NAME): $(OBJS)
 #%.o: %.c
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
-
 # Clean everything
 clean:
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
@@ -505,7 +512,12 @@ ifeq ($(PLATFORM),PLATFORM_RPI)
 	rm -fv *.o
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
+ifeq ($(PLATFORM_OS),WINDOWS)
 	del *.o *.html *.js
+endif
+ifeq ($(PLATFORM_OS),LINUX)
+	rm -f *.o *.html *.js
+endif
 endif
 	$(MAKE) -C noise/ clean
 	$(MAKE) -C lua_api/ clean

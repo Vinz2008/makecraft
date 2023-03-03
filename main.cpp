@@ -13,10 +13,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef PLATFORM_WEB
 #include <limits.h>
+#endif
 #include "raylib.h"
 #include "raymath.h"
+#ifndef PLATFORM_WEB
 #define CAMERA_IMPLEMENTATION
+#endif
 #define CAMERA_STANDALONE_WITH_RAYLIB
 #include "rcamera.h"
 #define RLIGHTS_IMPLEMENTATION
@@ -47,6 +51,8 @@
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
+    static void UpdateDrawFrame(void);
+    #define CAMERA_ROTATION_SPEED                           0.03f
 #endif
 
 
@@ -108,6 +114,10 @@ Vector3* cubeArrayPos;
 
 int mode = creative_mode;
 
+bool exitWindow = false;
+bool showHUD = false;
+int pos_hud = 0;
+
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
@@ -154,15 +164,23 @@ bool isPlayerOnTopOfBlockArray(Player player, BlockArray* blockArray){
     return false;
 }
 
+#ifdef PLATFORM_WEB
+float get_noise_data(std::vector<float> noise, int x, int y, int size){
+
+}
+#endif
 
 //----------------------------------------------------------------------------------
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
+#ifndef PLATFORM_WEB
     std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, 164647, 0.05);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
     float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
-
+#else
+    std::vector<float> farray;
+#endif
     fp = fopen("log.txt", "w");
     player.camera.fovy= 0;
     blockArray = (BlockArray*)malloc(sizeof(BlockArray));
@@ -189,11 +207,13 @@ int main(int argc, char* argv[]){
             }
         }
     }
+#ifndef PLATFORM_WEB
     printf("filename_lua : %s\n", filename_lua);
     if (access(filename_lua, F_OK) == 0){
         printf("run file lua : %s\n", filename_lua);
         runLuaFile(filename_lua);
     }
+#endif
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 1200;
@@ -231,22 +251,19 @@ int main(int argc, char* argv[]){
     int framesCounter = 0;
     int letterCount = 0;
     //char filename_lua[10] = "\0";
-    SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     elevation = (float**)malloc(sizeof(float*) * 1000);
 
     //--------------------------------------------------------------------------------------
 
-#if defined(PLATFORM_WEB)
+#if 0
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
+    SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     lastMousePos = GetMousePosition();
-    bool exitWindow = false;
-    bool showHUD = false;
-    int pos_hud = 0;
     SetExitKey(0);
 
     // Main game loop
@@ -494,7 +511,7 @@ int main(int argc, char* argv[]){
 }
 
 // Update and draw game frame
-/*static void UpdateDrawFrame(void)
+static void UpdateDrawFrame(void)
 {
     // Update
     //----------------------------------------------------------------------------------
@@ -507,7 +524,7 @@ int main(int argc, char* argv[]){
 
         ClearBackground(RAYWHITE);
 
-        BeginMode3D(camera);
+        BeginMode3D(player.camera);
 
             DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
             DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
@@ -521,4 +538,4 @@ int main(int argc, char* argv[]){
 
     EndDrawing();
     //----------------------------------------------------------------------------------
-}*/
+}

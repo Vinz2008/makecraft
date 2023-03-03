@@ -1,6 +1,13 @@
 CC      = gcc
 CFLAGS  = -Wall
 LDFLAGS =
+AR = ar
+
+ifeq ($(PLATFORM),PLATFORM_WEB)
+CC = emcc
+AR = emar
+CFLAGS += -I/usr/include
+endif
 
 SRCS := $(wildcard *.c)
 OBJS = $(patsubst %.c,%.o,$(SRCS))
@@ -13,7 +20,7 @@ all: clean libmap.a
 	$(CC) -o $@ $^ -c $(CFLAGS) $(LDFLAGS)
 
 libmap.a: $(OBJS)
-	ar rcs libmap.a $^
+	$(AR) rcs libmap.a $^
 
 clean:
 	rm -rf libmap.a $(OBJS) *.o *.a
