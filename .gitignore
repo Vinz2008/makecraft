@@ -9,3 +9,6 @@ log.txt
 log*
 *.bin
 *.txt
+*.data
+*.html
+*.js
