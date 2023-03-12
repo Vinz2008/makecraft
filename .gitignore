@@ -11,4 +11,6 @@ log*
 *.txt
 *.data
 *.html
+*.wasm
 *.js
+android.makecraft

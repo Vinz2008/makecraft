@@ -223,11 +223,7 @@ int main(int argc, char* argv[]){
     int i3;
 
     InitWindow(screenWidth, screenHeight, "raylib");
-    shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
-    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-    int ambientLoc = GetShaderLocation(shader, "ambient");
-    float locIndex[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    SetShaderValue(shader, ambientLoc, locIndex, SHADER_UNIFORM_VEC4);
+
     player.camera.position = (Vector3){ 10.0f, PLAYER_HEIGHT + 10.0f, 8.0f };
     player.camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     player.camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
@@ -243,6 +239,19 @@ int main(int argc, char* argv[]){
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
     StoneTexture = LoadTextureFromImage(StoneTextureMap);
     WaterTexture = LoadTextureFromImage(WaterTextureMap);
+
+    shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
+    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    int ambientLoc = GetShaderLocation(shader, "ambient");
+    float locIndex[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    SetShaderValue(shader, ambientLoc, locIndex, SHADER_UNIFORM_VEC4);
+    Light lights[MAX_LIGHTS] = { 0 };
+    lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 10, 10, 10 }, Vector3Zero(), YELLOW, shader);
+    lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, shader);
+    lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, shader);
+    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);
+
+
     Rectangle textBox = {10, 10,  screenWidth/1.1, screenHeight/1.1};
     Ray ray = { 0 };
     RayCollision collision = { 0 };
@@ -250,6 +259,8 @@ int main(int argc, char* argv[]){
     bool mouseOnText = false;
     int framesCounter = 0;
     int letterCount = 0;
+    int timeDeltaJump = 0;
+
     //char filename_lua[10] = "\0";
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -323,6 +334,7 @@ int main(int argc, char* argv[]){
                       cosf(rotation.x)*direction[0] +
                       sinf(rotation.x)*direction[3] -
                       sinf(rotation.x)*direction[2])/PLAYER_MOVEMENT_SENSITIVITY;*/
+
         Vector2 mousePositionDelta = GetMouseDelta();
         bool moveInWorldPlane = true;
         bool lockView = true;
@@ -345,6 +357,10 @@ int main(int argc, char* argv[]){
         if (IsKeyDown(KEY_D)) CameraMoveRight(&player.camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
         //if (IsKeyDown(KEY_SPACE)) CameraMoveUp(camera, CAMERA_MOVE_SPEED);
         //if (IsKeyDown(KEY_LEFT_CONTROL)) CameraMoveUp(camera, -CAMERA_MOVE_SPEED);              
+        float positionX, positionY;     // Position of the character
+        float velocity = 0;
+        float acceleration = 0;
+        float gravity = 0.5f;           // How strong is gravity
         if (mode == creative_mode){
         if (IsKeyDown(KEY_LEFT_SHIFT))
             //movement.y -= 0.30f;
@@ -353,6 +369,17 @@ int main(int argc, char* argv[]){
             //movement.y += 0.30f;
             CameraMoveUp(&player.camera, 0.30f);
         } else {
+        /*if (IsKeyDown(KEY_SPACE) && isPlayerOnTopOfBlockArray(player, blockArray)){
+            acceleration += 100.0f;
+            timeDeltaJump = 0;
+        } else if (!isPlayerOnTopOfBlockArray(player, blockArray)){
+            acceleration -= 0.1f;
+            timeDeltaJump++;
+        } else {
+            timeDeltaJump = 0;
+        }
+        velocity += acceleration * (timeDeltaJump/10);
+        CameraMoveUp(&player.camera, velocity*(timeDeltaJump/10));*/
         if (IsKeyDown(KEY_SPACE))
             CameraMoveUp(&player.camera, 0.30f);
         if (!isPlayerOnTopOfBlockArray(player, blockArray)){
