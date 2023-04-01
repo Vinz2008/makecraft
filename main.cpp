@@ -260,8 +260,6 @@ int main(int argc, char* argv[]){
     int framesCounter = 0;
     int letterCount = 0;
     int timeDeltaJump = 0;
-
-    //char filename_lua[10] = "\0";
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     elevation = (float**)malloc(sizeof(float*) * 1000);
@@ -317,24 +315,6 @@ int main(int argc, char* argv[]){
         if (mouseOnText) framesCounter++;
         else framesCounter = 0;*/
         if (!showHUD){
-        /*Vector2 mouseMovement = Vector2Subtract(GetMousePosition(), lastMousePos);
-        rotation.x += (mouseMovement.x*CAMERA_MOUSE_MOVE_SENSITIVITY);
-        rotation.y += (mouseMovement.y*CAMERA_MOUSE_MOVE_SENSITIVITY);
-        lastMousePos = GetMousePosition();
-        float direction[] = { IsKeyDown(KEY_W),
-                              IsKeyDown(KEY_S),
-                              IsKeyDown(KEY_D),
-                              IsKeyDown(KEY_A)};
-        movement = (Vector3){0, 0, 0};
-        movement.x = (sinf(rotation.x)*direction[1] -
-                      sinf(rotation.x)*direction[0] -
-                      cosf(rotation.x)*direction[3] +
-                      cosf(rotation.x)*direction[2])/PLAYER_MOVEMENT_SENSITIVITY;
-
-        movement.z = (cosf(rotation.x)*direction[1] -
-                      cosf(rotation.x)*direction[0] +
-                      sinf(rotation.x)*direction[3] -
-                      sinf(rotation.x)*direction[2])/PLAYER_MOVEMENT_SENSITIVITY;*/
 
         Vector2 mousePositionDelta = GetMouseDelta();
         bool moveInWorldPlane = true;
@@ -387,22 +367,6 @@ int main(int argc, char* argv[]){
             CameraMoveUp(&player.camera, -0.17f); 
         }
         }
-
-        /*player.camera.position.x += movement.x / PLAYER_MOVEMENT_SENSITIVITY;
-
-        player.camera.position.y += movement.y;
-
-        player.camera.position.z += movement.z / PLAYER_MOVEMENT_SENSITIVITY;
-
-        // -------------------- Retarget stuff --------------------
-
-        Matrix translation = MatrixTranslate(0, 0, (10));
-        Matrix rotation2 = MatrixRotateXYZ((Vector3){ PI*2 - rotation.y, PI*2 - rotation.x, 0 });
-        Matrix transform = MatrixMultiply(translation, rotation2);
-
-        player.camera.target.x = player.camera.position.x - transform.m12;
-        player.camera.target.y = player.camera.position.y - transform.m13;
-        player.camera.target.z = player.camera.position.z - transform.m14;*/
 
         if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)){
             ray = GetMouseRay(GetMousePosition(), player.camera);
@@ -477,18 +441,8 @@ int main(int argc, char* argv[]){
             int frequency1 = 1;
             int frequency2 = 2;
             int frequency3 = 4;
-            /*for (i = 3; i < 27; i = i + 3) {
-            DrawCube((Vector3){cubePosition.x + (float)i2, cubePosition.y, cubePosition.z  + (float)i}, 2.0f, 2.0f, 2.0f, RED);
-            DrawCubeWires((Vector3){cubePosition.x + (float)i2, cubePosition.y, cubePosition.z  + (float)i}, 2.0f, 2.0f, 2.0f, BLACK); 
-            }
-            BoundingBox cubeBox = {cubePosition, (Vector3){cubePosition.x + 1.0f, cubePosition.y + 1.0f, cubePosition.z + 1.0f}};
-            Ray rayPointerPlayer = {PlayerPosition, (Vector3){camera.position.x, 1.0f, camera.position.z}};
-            DrawGrid(10, 1.0f);    player.camera.position.y -= 1
-            GetRayCollisionBox(rayPointerPlayer,cubeBox);
-            */
 
         EndMode3D();
-        //camera.position.y -= 1;
         DrawLine(screenWidth/2, screenHeight/2, screenWidth/2 , screenHeight/2 - screenHeight/20, GRAY);
         DrawLine(screenWidth/2 - screenWidth/40, screenHeight/2 - screenHeight/40, screenWidth/2 + screenWidth/40, screenHeight/2 - screenHeight/40, GRAY);
         DrawFPS(10, 10);
@@ -536,34 +490,4 @@ int main(int argc, char* argv[]){
     //--------------------------------------------------------------------------------------
     free(elevation);
     return 0;
-}
-
-// Update and draw game frame
-static void UpdateDrawFrame(void)
-{
-    // Update
-    //----------------------------------------------------------------------------------
-    //UpdateCamera(&camera);
-    //----------------------------------------------------------------------------------
-
-    // Draw
-    //----------------------------------------------------------------------------------
-    BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-
-        BeginMode3D(player.camera);
-
-            DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-            DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
-            DrawGrid(10, 1.0f);
-
-        EndMode3D();
-
-        DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
-
-        DrawFPS(10, 10);
-
-    EndDrawing();
-    //----------------------------------------------------------------------------------
 }
