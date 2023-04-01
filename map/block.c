@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "chunk.h"
+#include "../engine/cube_render.h"
 #include "../makecraft.h"
 
 extern Texture2D DirtTexture;

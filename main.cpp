@@ -271,7 +271,8 @@ int main(int argc, char* argv[]){
 #if 0
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
-    SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
+    //SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
+    DisableCursor();
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
     lastMousePos = GetMousePosition();

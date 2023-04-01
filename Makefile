@@ -439,6 +439,8 @@ LDLIBS += lua_api/liblua_api.a
 endif
 LDLIBS += lib/misc.a
 LDLIBS += map/libmap.a
+LDLIBS += engine/libengine.a
+
 
 ifneq ($(PLATFORM),PLATFORM_WEB)
 LDLIBS += -llua -lm
@@ -480,6 +482,7 @@ all: clean
 	$(MAKE) -C lib/
 	$(MAKE) -C lua_api/
 	$(MAKE) -C map/
+	$(MAKE) -C engine/
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME
@@ -498,7 +501,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
 		del *.o *.exe /s
     endif
     ifeq ($(PLATFORM_OS),LINUX)
-	find -type f -executable | xargs file -i | grep -E 'x-object|x-archive|x-sharedlib|x-executable' | rev | cut -d ':' -f 2- | rev | xargs rm -fv
+#	find -type f -executable | xargs file -i | grep -E 'x-object|x-archive|x-sharedlib|x-executable' | rev | cut -d ':' -f 2- | rev | xargs rm -fv
 	rm -f makecraft
 	rm -f *.o
     endif
