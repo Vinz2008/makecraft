@@ -526,6 +526,7 @@ endif
 	$(MAKE) -C lua_api/ clean
 	$(MAKE) -C lib/ clean
 	$(MAKE) -C map/ clean
+	$(MAKE) -C engine/ clean
 	@echo Cleaning done
 
 raylib:

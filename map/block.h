@@ -13,6 +13,14 @@ extern "C" {            // Prevents name mangling of functions
 #pragma once
 
 
+enum direction {
+    direction_top,
+    direction_bottom,
+    direction_right,
+    direction_left,
+    direction_front,
+    direction_back,
+};
 typedef struct {
     float x;
     float y;
@@ -29,8 +37,10 @@ typedef struct {
 void initBlockArray(BlockArray* blockArray, size_t initalSize);
 void addToBlockArray(BlockArray* blockArray, Block block);
 void emptyBlockArray(BlockArray* blockArray);
+bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block);
 
 Block* createBlock(BlockArray* blockArray, float x, float y, float z, int texture);
+bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block);
 
 #ifdef __cplusplus
 }

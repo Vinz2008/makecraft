@@ -175,7 +175,10 @@ float get_noise_data(std::vector<float> noise, int x, int y, int size){
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
 #ifndef PLATFORM_WEB
-    std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, 164647, 0.05);
+    int seed = 164647;
+    //int seed = rand() * 167 * rand();
+    float frequency = 0.05;
+    std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
     float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
 #else
