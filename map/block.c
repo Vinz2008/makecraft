@@ -62,17 +62,18 @@ bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block){
         switch (direction)
         {
         case direction_top:
-            return tempBlock->y + 2*CUBE_SIZE == block.y;
+            //printf("pos 1 y : %f, pos 2 y : %f\n", block.y + CUBE_SIZE, blockArray->blockArray[i].y);
+            return tempBlock->y == block.y + CUBE_SIZE;
         case direction_bottom:
-            return tempBlock->y - 2*CUBE_SIZE == block.y;
+            return block.y - CUBE_SIZE == tempBlock->y;
         case direction_right:
-            return tempBlock->x + 2*CUBE_SIZE == block.x;
+            return block.x + CUBE_SIZE == tempBlock->x;
         case direction_left:
-            return tempBlock->x - 2*CUBE_SIZE == block.x;
+            return block.x - CUBE_SIZE == tempBlock->x;
         case direction_front:
-            return tempBlock->z + 2*CUBE_SIZE == block.z;
+            return block.z + CUBE_SIZE == tempBlock->z;
         case direction_back:
-            return tempBlock->z - 2*CUBE_SIZE == block.z;
+            return block.z - CUBE_SIZE == tempBlock->z;
         }
     }
     

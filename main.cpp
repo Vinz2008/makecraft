@@ -185,7 +185,7 @@ int main(int argc, char* argv[]){
     std::vector<float> farray;
 #endif
     fp = fopen("log.txt", "w");
-    player.camera.fovy= 0;
+    player.camera.fovy = 0;
     blockArray = (BlockArray*)malloc(sizeof(BlockArray));
     initBlockArray(blockArray, NB_BLOCK_NOISE);
     for (int x = 0; x < NB_BLOCK_NOISE; x++){
