@@ -338,7 +338,7 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
     
     # Build using asyncify
     ifeq ($(BUILD_WEB_ASYNCIFY),TRUE)
-        LDFLAGS += -s ASYNCIFY
+        LDFLAGS += -s ASYNCIFY -s EXPORTED_RUNTIME_METHODS=ccall
     endif
     
     # Add resources building if required
