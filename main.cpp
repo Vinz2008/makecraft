@@ -189,10 +189,10 @@ int main(int argc, char* argv[]){
     blockArray = (BlockArray*)malloc(sizeof(BlockArray));
     initBlockArray(blockArray, NB_BLOCK_NOISE);
     for (int x = 0; x < NB_BLOCK_NOISE; x++){
-        for (int y = 0; y < NB_BLOCK_NOISE; y++){
-        float z = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
-        int texture = get_block_type(z);
-        addToBlockArray(blockArray, (Block){x*2.0f, z*2.0f, y*2.0f, texture});
+        for (int z = 0; z < NB_BLOCK_NOISE; z++){
+        float y = round(get_noise_data(farray, x, z, NB_BLOCK_NOISE));
+        int texture = get_block_type(y);
+        addToBlockArray(blockArray, (Block){x*2.0f, y*2.0f, z*2.0f, texture});
     }
     }
     printf("blockArraysize : %d\n", blockArray->used);
