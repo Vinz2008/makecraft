@@ -492,6 +492,7 @@ int main(int argc, char* argv[]){
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    tpl_serialize_block_array(blockArray, "blockArray.tpl");
     UnloadImage(DirtTextureMap);
     UnloadTexture(DirtTexture);
     CloseWindow();                  // Close window and OpenGL context
