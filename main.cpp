@@ -186,14 +186,19 @@ int main(int argc, char* argv[]){
 #endif
     fp = fopen("log.txt", "w");
     player.camera.fovy = 0;
-    blockArray = (BlockArray*)malloc(sizeof(BlockArray));
-    initBlockArray(blockArray, NB_BLOCK_NOISE);
-    for (int x = 0; x < NB_BLOCK_NOISE; x++){
-        for (int z = 0; z < NB_BLOCK_NOISE; z++){
-        float y = round(get_noise_data(farray, x, z, NB_BLOCK_NOISE));
-        int texture = get_block_type(y);
-        addToBlockArray(blockArray, (Block){x*2.0f, y*2.0f, z*2.0f, texture});
-    }
+    if (access("blockArray.tpl", F_OK) == 0){
+        blockArray = tpl_deserialize_block_array("blockArray.tpl");
+    } else {
+        blockArray = (BlockArray*)malloc(sizeof(BlockArray));
+        initBlockArray(blockArray, NB_BLOCK_NOISE);
+        for (int x = 0; x < NB_BLOCK_NOISE; x++){
+            for (int z = 0; z < NB_BLOCK_NOISE; z++){
+                float y = round(get_noise_data(farray, x, z, NB_BLOCK_NOISE));
+                int texture = get_block_type(y);
+                addToBlockArray(blockArray, (Block){x*2.0f, y*2.0f, z*2.0f, texture});
+            }
+        }
+        tpl_serialize_block_array(blockArray, "blockArray.tpl");
     }
     printf("blockArraysize : %d\n", blockArray->used);
     serialize_block_array(blockArray, "blockArray.bin");

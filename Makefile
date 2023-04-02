@@ -436,6 +436,9 @@ endif
 ifneq ($(PLATFORM),PLATFORM_WEB)
 LDLIBS += noise/libnoise.a
 LDLIBS += lua_api/liblua_api.a
+ifeq ($(PLATFORM_OS),LINUX)
+LDLIBS += -ltpl
+endif
 endif
 LDLIBS += lib/misc.a
 LDLIBS += map/libmap.a

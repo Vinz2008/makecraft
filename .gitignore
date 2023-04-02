@@ -8,6 +8,7 @@ raylib/
 log.txt
 log*
 *.bin
+*.tpl
 *.txt
 *.data
 *.html
