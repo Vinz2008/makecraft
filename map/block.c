@@ -17,11 +17,14 @@ void initBlockArray(BlockArray* blockArray, size_t initalSize){
 }
 
 void addToBlockArray(BlockArray* blockArray, Block block){
+    printf("TEST add to block\n");
      if (blockArray->used == blockArray->size){
         blockArray->size *=2;
         blockArray->blockArray = realloc(blockArray->blockArray, blockArray->size * sizeof(Block));
     }
+    printf("TEST add to block after potential realloc\n used : %d, block x : %f, block y : %f, block z : %f\n", blockArray->used, block.x, block.y, block.z);
     blockArray->blockArray[blockArray->used++] = block;
+    printf("TEST add to block end\n");
 }
 
 
@@ -29,6 +32,26 @@ void emptyBlockArray(BlockArray* blockArray){
     free(blockArray->blockArray);
     blockArray->blockArray = NULL;
     blockArray->used = blockArray->size = 0;
+}
+
+BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
+    BlockArray* newBlockArray = malloc(sizeof(BlockArray));
+    printf("TEST\n");
+    initBlockArray(newBlockArray, 1);
+    printf("TEST %d\n", blockArray->used);
+    int posNewArray = 0;
+    for (int i = 0; i < blockArray->used; i++){
+        if (i != index){
+            printf("TEST in loop\n");
+            addToBlockArray(newBlockArray, blockArray->blockArray[posNewArray]);
+            posNewArray++;
+            printf("TEST in loop 2\n");
+        }
+    }
+    printf("TEST\n");
+    free(blockArray);
+    printf("TEST\n");
+    return newBlockArray;
 }
 
 Block* createBlock(BlockArray* blockArray, float x, float y, float z, int texture){

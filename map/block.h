@@ -38,6 +38,7 @@ void initBlockArray(BlockArray* blockArray, size_t initalSize);
 void addToBlockArray(BlockArray* blockArray, Block block);
 void emptyBlockArray(BlockArray* blockArray);
 bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block);
+BlockArray* removeFromBlockArray(int index, BlockArray* blockArray);
 
 Block* createBlock(BlockArray* blockArray, float x, float y, float z, int texture);
 bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block);

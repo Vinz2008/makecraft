@@ -380,9 +380,12 @@ int main(int argc, char* argv[]){
             ray = GetMouseRay(GetMousePosition(), player.camera);
             Mesh MeshCube = GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
             for (int i = 0; i < blockArray->used; i++){
-                RayCollision collision = GetRayCollisionMesh(ray, MeshCube, MatrixTranslate(blockArray->blockArray[i].x, blockArray->blockArray[i].y, blockArray->blockArray[i].z));
+                //printf("i : %d, used : %d, size : %d\n", i, blockArray->used, blockArray->size);
+                Block tempBlock = blockArray->blockArray[i];
+                RayCollision collision = GetRayCollisionMesh(ray, MeshCube, MatrixTranslate(tempBlock.x, tempBlock.y, tempBlock.z));
                 if (collision.hit){
                     printf("ray collide with cube\n");
+                    blockArray = removeFromBlockArray(i, blockArray);
                 }
             }
         }
