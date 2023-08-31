@@ -1,5 +1,7 @@
 #include "block.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "chunk.h"
@@ -22,7 +24,7 @@ void addToBlockArray(BlockArray* blockArray, Block block){
         blockArray->size *=2;
         blockArray->blockArray = realloc(blockArray->blockArray, blockArray->size * sizeof(Block));
     }
-    printf("TEST add to block after potential realloc\n used : %d, block x : %f, block y : %f, block z : %f\n", blockArray->used, block.x, block.y, block.z);
+    printf("TEST add to block after potential realloc\n used : %ld, block x : %f, block y : %f, block z : %f\n", blockArray->used, block.x, block.y, block.z);
     blockArray->blockArray[blockArray->used++] = block;
     printf("TEST add to block end\n");
 }
@@ -37,17 +39,21 @@ void emptyBlockArray(BlockArray* blockArray){
 BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
     BlockArray* newBlockArray = malloc(sizeof(BlockArray));
     printf("TEST\n");
-    initBlockArray(newBlockArray, 1);
-    printf("TEST %d\n", blockArray->used);
+    initBlockArray(newBlockArray, blockArray->size);
+    printf("TEST %ld\n", blockArray->used);
     int posNewArray = 0;
-    for (int i = 0; i < blockArray->used; i++){
+    memmove(newBlockArray->blockArray, blockArray->blockArray, (index)*sizeof(Block)); 
+    memmove(newBlockArray->blockArray+index, blockArray->blockArray+(index+1), (blockArray->used - index - 1)*sizeof(Block)); 
+    newBlockArray->size = blockArray->size;
+    newBlockArray->used = blockArray->used;
+    /*for (int i = 0; i < blockArray->used; i++){
         if (i != index){
             printf("TEST in loop\n");
             addToBlockArray(newBlockArray, blockArray->blockArray[posNewArray]);
             posNewArray++;
             printf("TEST in loop 2\n");
         }
-    }
+    }*/
     printf("TEST\n");
     free(blockArray);
     printf("TEST\n");
@@ -82,8 +88,7 @@ Block* createBlock(BlockArray* blockArray, float x, float y, float z, int textur
 bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block){
     for (int i = 0; i < blockArray->used; i++){
         Block* tempBlock = &blockArray->blockArray[i];
-        switch (direction)
-        {
+        switch (direction){
         case direction_top:
             //printf("pos 1 y : %f, pos 2 y : %f\n", block.y + CUBE_SIZE, blockArray->blockArray[i].y);
             return tempBlock->y == block.y + CUBE_SIZE;
@@ -99,5 +104,6 @@ bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block){
             return block.z - CUBE_SIZE == tempBlock->z;
         }
     }
+    return false;
     
 }

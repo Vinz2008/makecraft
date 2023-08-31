@@ -174,16 +174,20 @@ EXAMPLE_RUNTIME_PATH   ?= $(RAYLIB_RELEASE_PATH)
 
 # Define default C compiler: gcc
 # NOTE: define g++ compiler if using C++
-CC = g++
+CC = gcc
+
+CXX = g++
 
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),OSX)
         # OSX default compiler
         CC = clang
+		CXX = clang++
     endif
     ifeq ($(PLATFORM_OS),BSD)
         # FreeBSD, OpenBSD, NetBSD, DragonFly default compiler
         CC = clang
+		CXX = clang++
     endif
 endif
 ifeq ($(PLATFORM),PLATFORM_RPI)
@@ -191,13 +195,15 @@ ifeq ($(PLATFORM),PLATFORM_RPI)
         # Define RPI cross-compiler
         #CC = armv6j-hardfloat-linux-gnueabi-gcc
         CC = $(RPI_TOOLCHAIN)/bin/arm-linux-gnueabihf-gcc
+		CXX = $(RPI_TOOLCHAIN)/bin/arm-linux-gnueabihf-g++
     endif
 endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
     # HTML5 emscripten compiler
     # WARNING: To compile to HTML5, code must be redesigned 
     # to use emscripten.h and emscripten_set_main_loop()
-    CC = em++
+    CC = emcc
+	CXX = em++
 endif
 
 # Define default make program: Mingw32-make
@@ -440,9 +446,12 @@ ifeq ($(PLATFORM_OS),LINUX)
 LDLIBS += -ltpl
 endif
 endif
+
+
 LDLIBS += lib/misc.a
 LDLIBS += map/libmap.a
 LDLIBS += engine/libengine.a
+LDLIBS += utils/libutils.a
 
 
 ifneq ($(PLATFORM),PLATFORM_WEB)
@@ -486,17 +495,18 @@ all: clean
 	$(MAKE) -C lua_api/
 	$(MAKE) -C map/
 	$(MAKE) -C engine/
+	$(MAKE) -C utils/
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME
 $(PROJECT_NAME): $(OBJS)
-	$(CC) -o $(PROJECT_NAME)$(EXT) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
+	$(CXX) -o $(PROJECT_NAME)$(EXT) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
 
 # Compile source files
 # NOTE: This pattern will compile every module defined on $(OBJS)
 #%.o: %.c
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
+	$(CXX) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
 # Clean everything
 clean:
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)

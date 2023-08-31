@@ -32,7 +32,7 @@ typedef struct {
     Block* blockArray;
     size_t used;
     size_t size;
-}BlockArray;
+} BlockArray;
 
 void initBlockArray(BlockArray* blockArray, size_t initalSize);
 void addToBlockArray(BlockArray* blockArray, Block block);

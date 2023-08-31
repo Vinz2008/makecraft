@@ -41,6 +41,7 @@
 #include "map/water.h"
 #include "map/serialize.h"
 #include "noise/noise2.h"
+#include "utils/list.h"
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
@@ -60,27 +61,27 @@
 #define CAMERA_MOUSE_MOVE_SENSITIVITY 0.001f
 #define CAMERA_MOVE_SPEED  0.5f
 
-#define PLAYER_HEIGHT 5.0f
+#define PLAYER_HEIGHT 1.0f
 
 FILE* fp;
-struct blockColumn {
+/*struct blockColumn {
     Block* blockArray;
     size_t used;
     size_t size;
-};
+};*/
 
-typedef struct {
+/*typedef struct {
     Vector3 cubeCenter;
     Vector3 cubeTopRight;
     Vector3 cubeTopLeft;
     struct blockColumn* BlockColumn;
-}CHUNK;
+}CHUNK;*/
 
-typedef struct {
+/*typedef struct {
     CHUNK* chunk;
     size_t size;
     size_t used;
-} chunkList;
+} chunkList;*/
 
 
 
@@ -93,6 +94,8 @@ Player player;
 
 
 BlockArray* blockArray;
+list_t* chunkArray;
+
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -103,8 +106,8 @@ Vector3 PlayerPositionFloor = { 0 };
 BoundingBox PlayerHitBox = {0};
 BoundingBox GroundHitBox = {0};
 static Vector2 lastMousePos;
-static Vector3 movement = {0, -0.2f, 0};
-static Vector3 rotation;
+//static Vector3 movement = {0, -0.2f, 0};
+//static Vector3 rotation;
 Texture2D DirtTexture;
 Texture2D StoneTexture;
 Texture2D WaterTexture;
@@ -147,7 +150,7 @@ bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray* blockArray){
 }
 
 bool isPlayerOnTopOfBlock(Player player, Block block){
-    if (isNumberAround(player.camera.position.x, block.x, 1.0f) && isNumberAround(player.camera.position.y, block.y, 4.0f) && isNumberAround(player.camera.position.z, block.z, 1.0f)){
+    if (isNumberAround(player.camera.position.x, block.x, 1.0f) && isNumberAround(player.camera.position.y - PLAYER_HEIGHT, block.y, 4.0f) && isNumberAround(player.camera.position.z, block.z, 1.0f)){
         printf("on top\n");
         return true;
     }
@@ -157,7 +160,16 @@ bool isPlayerOnTopOfBlock(Player player, Block block){
 
 bool isPlayerOnTopOfBlockArray(Player player, BlockArray* blockArray){
     for (int i = 0; i < blockArray->used; i++) {
-        if (isPlayerOnTopOfBlock(player, blockArray->blockArray[i])){
+        if (isPlayerOnTopOfBlock(player, blockArray->blockArray[i]) && blockArray->blockArray[i].material != water_texture){
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isPlayerOnTopOfBlockOfWater(Player player, BlockArray* blockArray){
+    for (int i = 0; i < blockArray->used; i++) {
+        if (isPlayerOnTopOfBlock(player, blockArray->blockArray[i]) && blockArray->blockArray[i].material == water_texture){
             return true;
         }
     }
@@ -180,7 +192,7 @@ int main(int argc, char* argv[]){
     float frequency = 0.05;
     std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
-    float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
+    //float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
 #else
     std::vector<float> farray;
 #endif
@@ -200,8 +212,8 @@ int main(int argc, char* argv[]){
         }
         tpl_serialize_block_array(blockArray, "blockArray.tpl");
     }
-    printf("blockArraysize : %d\n", blockArray->used);
-    serialize_block_array(blockArray, "blockArray.bin");
+    printf("blockArraysize : %ld\n", blockArray->used);
+    //serialize_block_array(blockArray, "blockArray.bin");
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
     if (argc > 0){
@@ -226,9 +238,6 @@ int main(int argc, char* argv[]){
     //--------------------------------------------------------------------------------------
     const int screenWidth = 1200;
     const int screenHeight = 675;
-    int i;
-    int i2;
-    int i3;
 
     InitWindow(screenWidth, screenHeight, "raylib");
 
@@ -267,11 +276,11 @@ int main(int argc, char* argv[]){
     bool mouseOnText = false;
     int framesCounter = 0;
     int letterCount = 0;
-    int timeDeltaJump = 0;
+    //int timeDeltaJump = 0;
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     elevation = (float**)malloc(sizeof(float*) * 1000);
-
+    float falling_speed = 0;
     //--------------------------------------------------------------------------------------
 
 #if 0
@@ -291,37 +300,8 @@ int main(int argc, char* argv[]){
         if (IsKeyPressed(KEY_ESCAPE)){
             showHUD = (showHUD) ? false : true;
             printf("showHUD : %d\n", showHUD);
-            //SetMouseCursor(MOUSE_CURSOR_ARROW);
         }
-        /*if (CheckCollisionPointRec(GetMousePosition(), textBox) && showHUD == true) mouseOnText = true;
-        else mouseOnText = false;
-        if (mouseOnText){
-            SetMouseCursor(MOUSE_CURSOR_IBEAM);
-            int key = GetCharPressed();
-            while (key > 0)
-            {
-                // NOTE: Only allow keys in range [32..125]
-                if ((key >= 32) && (key <= 125) && (letterCount < 9))
-                {
-                    filename_lua[letterCount] = (char)key;
-                    filename_lua[letterCount+1] = '\0'; // Add null terminator at the end of the string.
-                    letterCount++;
-                }
-
-                key = GetCharPressed();  // Check next character in the queue
-            }
-
-            if (IsKeyPressed(KEY_BACKSPACE))
-            {
-                letterCount--;
-                if (letterCount < 0) letterCount = 0;
-                filename_lua[letterCount] = '\0';
-            }
-        }
-        else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-
-        if (mouseOnText) framesCounter++;
-        else framesCounter = 0;*/
+        
         if (!showHUD){
 
         Vector2 mousePositionDelta = GetMouseDelta();
@@ -338,18 +318,15 @@ int main(int argc, char* argv[]){
 
         CameraYaw(&player.camera, -mousePositionDelta.x*CAMERA_MOUSE_MOVE_SENSITIVITY, rotateAroundTarget);
         CameraPitch(&player.camera, -mousePositionDelta.y*CAMERA_MOUSE_MOVE_SENSITIVITY, lockView, rotateAroundTarget, rotateUp);
-  
+        
         // Camera movement
+        // TODO : make movement slower when in water
         if (IsKeyDown(KEY_W)) CameraMoveForward(&player.camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
         if (IsKeyDown(KEY_A)) CameraMoveRight(&player.camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
         if (IsKeyDown(KEY_S)) CameraMoveForward(&player.camera, -CAMERA_MOVE_SPEED, moveInWorldPlane);
         if (IsKeyDown(KEY_D)) CameraMoveRight(&player.camera, CAMERA_MOVE_SPEED, moveInWorldPlane);
         //if (IsKeyDown(KEY_SPACE)) CameraMoveUp(camera, CAMERA_MOVE_SPEED);
         //if (IsKeyDown(KEY_LEFT_CONTROL)) CameraMoveUp(camera, -CAMERA_MOVE_SPEED);              
-        float positionX, positionY;     // Position of the character
-        float velocity = 0;
-        float acceleration = 0;
-        float gravity = 0.5f;           // How strong is gravity
         if (mode == creative_mode){
         if (IsKeyDown(KEY_LEFT_SHIFT))
             //movement.y -= 0.30f;
@@ -358,21 +335,20 @@ int main(int argc, char* argv[]){
             //movement.y += 0.30f;
             CameraMoveUp(&player.camera, 0.30f);
         } else {
-        /*if (IsKeyDown(KEY_SPACE) && isPlayerOnTopOfBlockArray(player, blockArray)){
-            acceleration += 100.0f;
-            timeDeltaJump = 0;
-        } else if (!isPlayerOnTopOfBlockArray(player, blockArray)){
-            acceleration -= 0.1f;
-            timeDeltaJump++;
-        } else {
-            timeDeltaJump = 0;
+        CameraMoveUp(&player.camera, -falling_speed);
+        if (isPlayerOnTopOfBlockOfWater(player, blockArray)){
+            falling_speed /= 5.0f;
         }
-        velocity += acceleration * (timeDeltaJump/10);
-        CameraMoveUp(&player.camera, velocity*(timeDeltaJump/10));*/
-        if (IsKeyDown(KEY_SPACE))
-            CameraMoveUp(&player.camera, 0.30f);
         if (!isPlayerOnTopOfBlockArray(player, blockArray)){
-            CameraMoveUp(&player.camera, -0.17f); 
+            //CameraMoveUp(&player.camera, -0.17f); 
+            falling_speed += 0.1f;
+        } else {
+            falling_speed = 0;
+            if (IsKeyDown(KEY_SPACE)){
+            //CameraMoveUp(&player.camera, 0.30f);
+            // falling_speed -= 2.0f; // BIG JUMP (maybe add this as an effect or a parameter)
+               falling_speed -= 0.9f;
+            }
         }
         }
 
@@ -385,7 +361,8 @@ int main(int argc, char* argv[]){
                 RayCollision collision = GetRayCollisionMesh(ray, MeshCube, MatrixTranslate(tempBlock.x, tempBlock.y, tempBlock.z));
                 if (collision.hit){
                     printf("ray collide with cube\n");
-                    blockArray = removeFromBlockArray(i, blockArray);
+                    //blockArray = removeFromBlockArray(i, blockArray); // TODO : readd this when the mouse pointing will work
+                    blockArray->blockArray[i].material = water_texture;
                 }
             }
         }
@@ -422,20 +399,15 @@ int main(int argc, char* argv[]){
 
         BeginMode3D(player.camera);
             DrawPlane((Vector3){ 0.0f, 0.0f, 0.0f }, (Vector2){ 32.0f, 32.0f }, LIGHTGRAY);
-            Vector3 position;
-                    position.x = 0;
-                    position.y = 0;
-                    position.z = 0;
 
             for (float x = 0; x < NB_BLOCK_NOISE; x++){
                 for (float y = 0; y < NB_BLOCK_NOISE; y++){
                     float znoise = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
-                    float mult = 2.0f;
-                    int texture = get_block_type(znoise);
+                    //float mult = 2.0f;
+                    //int texture = get_block_type(znoise);
                     if (znoise < 17){
                     createWater(blockArray, x*2.0f, y*2.0f, znoise+0.1, 10);
                     }
-                    //printf("create block x %f, y %f, z %f\n", x*mult, znoise*mult, y*mult);
                     //Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult, texture);
                     //addToBlockArray(blockArray, *tempBlock);
                 }
@@ -446,12 +418,6 @@ int main(int argc, char* argv[]){
                 createBlock(blockArray, blocktemp.x, blocktemp.y, blocktemp.z, blocktemp.material);
             }
 
-
-            int height = 100;
-            int width = 100;
-            int frequency1 = 1;
-            int frequency2 = 2;
-            int frequency3 = 4;
 
         EndMode3D();
         DrawLine(screenWidth/2, screenHeight/2, screenWidth/2 , screenHeight/2 - screenHeight/20, GRAY);
@@ -487,9 +453,7 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - 10.0f, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
-    float test[] = {1.2};
-    serialize_array(test, sizeof(test[0]), 1, "test.bin");
-    serialize_block_array(blockArray, "blockArray.bin");
+
     }
 #endif
 

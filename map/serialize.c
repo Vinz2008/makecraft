@@ -5,8 +5,9 @@
 #include <unistd.h>
 #include "tpl.h"
 #include "block.h"
+#include "serialize.h"
 
-void bin_serialize_struct(void* structName, size_t size, char* filename){
+/*void bin_serialize_struct(void* structName, size_t size, char* filename){
     FILE* f = fopen(filename, "wb");
     fwrite(structName, size, 1, f);
     fclose(f);
@@ -32,6 +33,11 @@ BlockArray* bin_deserialize_block_array(char* filename){
     fread(blockArray->blockArray, sizeof(Block), size/sizeof(Block), f);
     fclose(f);
     return blockArray;
+}*/
+
+void tpl_serialize_chunk_array(){
+    tpl_node *tn;
+    tn = tpl_map("A(S(A(S(fffi)fff))");
 }
 
 void tpl_serialize_block_array(BlockArray* blockArray, char* filename){
@@ -62,7 +68,7 @@ BlockArray* tpl_deserialize_block_array(char* filename){
     return blockArray;
 }
 
-void serialize_struct(void* structName, size_t size, char* filename){
+/*void serialize_struct(void* structName, size_t size, char* filename){
     bin_serialize_struct(structName, size, filename);
 }
 
@@ -76,4 +82,4 @@ void serialize_block_array(BlockArray* blockArray, char* filename){
 
 BlockArray* deserialize_block_array(char* filename){
     return bin_deserialize_block_array(filename);
-}
+}*/

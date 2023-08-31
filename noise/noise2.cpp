@@ -8,7 +8,7 @@ std::vector<float> generate_noise(int size, int seed, float frequency){
 
     // Generate a size x size x size area of noise
     fnGenerator->GenUniformGrid2D(noiseOutput.data(), 0, 0, size, size, frequency, seed);
-    int index = 0;
+    //int index = 0;
 
     FILE* f = fopen("noise2.txt", "w");
     for (int y = 0; y < size; y++){
