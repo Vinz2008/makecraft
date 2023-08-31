@@ -19,7 +19,7 @@ void createChunk(BlockArray* blockArray, float x, float y, float z){
             tempBlock.y = y * temp;
             tempBlock.z = z + (float)i2;
             createBlock(blockArray, x + (float)i, y * temp, z + (float)i2, dirt_texture);
-            addToBlockArray(blockArray, tempBlock);
+            (blockArray, tempBlock);
             //DrawBoundingBox(PlayerHitBox, BLACK);
             //DrawLine3D(PlayerPosition,PlayerPositionFloor, BLACK);
             //}        

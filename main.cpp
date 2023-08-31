@@ -63,7 +63,6 @@
 
 #define PLAYER_HEIGHT 1.0f
 
-FILE* fp;
 /*struct blockColumn {
     Block* blockArray;
     size_t used;
@@ -108,9 +107,11 @@ BoundingBox GroundHitBox = {0};
 static Vector2 lastMousePos;
 //static Vector3 movement = {0, -0.2f, 0};
 //static Vector3 rotation;
+// Add a struct with all textures and create an init function which return a struct with all textures
 Texture2D DirtTexture;
 Texture2D StoneTexture;
 Texture2D WaterTexture;
+Texture2D EmptyTexture;
 Shader shader;
 
 Vector3* cubeArrayPos;
@@ -196,7 +197,6 @@ int main(int argc, char* argv[]){
 #else
     std::vector<float> farray;
 #endif
-    fp = fopen("log.txt", "w");
     player.camera.fovy = 0;
     if (access("blockArray.tpl", F_OK) == 0){
         blockArray = tpl_deserialize_block_array("blockArray.tpl");
@@ -253,10 +253,11 @@ int main(int argc, char* argv[]){
     Image DirtTextureMap = LoadImage("textures/dirt.png");
     Image StoneTextureMap = LoadImage("textures/stone.png");
     Image WaterTextureMap = LoadImage("textures/water.png");
+    Image EmptyTextureMap = LoadImage("textures/empty.png");
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
     StoneTexture = LoadTextureFromImage(StoneTextureMap);
     WaterTexture = LoadTextureFromImage(WaterTextureMap);
-
+    EmptyTexture = LoadTextureFromImage(EmptyTextureMap);
     shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     int ambientLoc = GetShaderLocation(shader, "ambient");
@@ -460,8 +461,13 @@ int main(int argc, char* argv[]){
     // De-Initialization
     //--------------------------------------------------------------------------------------
     tpl_serialize_block_array(blockArray, "blockArray.tpl");
+    destroyBlockArray(blockArray);
     UnloadImage(DirtTextureMap);
     UnloadTexture(DirtTexture);
+    UnloadImage(StoneTextureMap);
+    UnloadTexture(StoneTexture);
+    UnloadImage(WaterTextureMap);
+    UnloadTexture(WaterTexture);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     free(elevation);

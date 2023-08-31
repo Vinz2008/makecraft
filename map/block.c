@@ -11,6 +11,7 @@
 extern Texture2D DirtTexture;
 extern Texture2D StoneTexture;
 extern Texture2D WaterTexture;
+extern Texture2D EmptyTexture;
 
 void initBlockArray(BlockArray* blockArray, size_t initalSize){
     blockArray->blockArray = malloc(sizeof(Block) * initalSize);
@@ -34,6 +35,11 @@ void emptyBlockArray(BlockArray* blockArray){
     free(blockArray->blockArray);
     blockArray->blockArray = NULL;
     blockArray->used = blockArray->size = 0;
+}
+
+void destroyBlockArray(BlockArray* blockArray){
+    emptyBlockArray(blockArray);
+    free(blockArray);
 }
 
 BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
@@ -60,11 +66,11 @@ BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
     return newBlockArray;
 }
 
-Block* createBlock(BlockArray* blockArray, float x, float y, float z, int texture){
-    Block* tempBlock = malloc(sizeof(Block));
+/*Block**/ void createBlock(BlockArray* blockArray, float x, float y, float z, int texture){
+    /*Block* tempBlock = malloc(sizeof(Block));
     tempBlock->x = x;
     tempBlock->y = y;
-    tempBlock->z = z;
+    tempBlock->z = z;*/
     //addToBlockArray(blockArray, *tempBlock);
     //Model tempCube = LoadModelFromMesh(GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE));
     //DrawModel(tempCube, (Vector3){x, y, z}, 1,RED);
@@ -79,9 +85,11 @@ Block* createBlock(BlockArray* blockArray, float x, float y, float z, int textur
     } else if (texture == water_texture){
         texture2dBlock = &WaterTexture;
         col = CLITERAL(Color){ 255, 255, 255, 200 };
+    } else {
+        texture2dBlock = &EmptyTexture;
     }
     DrawCubeTexture(*texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , col);
-    return tempBlock;
+    //return tempBlock;
 }
 
 

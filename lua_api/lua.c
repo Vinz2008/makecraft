@@ -6,12 +6,15 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
+// TODO : refactor code in each module to make them just create the object files and then link them in the main Makefile
+
 extern BlockArray* blockArray;
 
 int lua_printTest(lua_State *L){
     FILE* fp2 = fopen("log2.txt", "w");
     fprintf(fp2, "test\n");
     printf("test\n");
+    fclose(fp2);
     return 1;
 }
 

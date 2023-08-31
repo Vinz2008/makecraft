@@ -440,18 +440,19 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
 endif
 
 ifneq ($(PLATFORM),PLATFORM_WEB)
-LDLIBS += noise/libnoise.a
-LDLIBS += lua_api/liblua_api.a
+#LDLIBS += noise/libnoise.a
+#LDLIBS += lua_api/liblua_api.a
+LDLIBS += $(wildcard noise/*.o) $(wildcard lua_api/*.o)
 ifeq ($(PLATFORM_OS),LINUX)
 LDLIBS += -ltpl
 endif
 endif
 
-
-LDLIBS += lib/misc.a
-LDLIBS += map/libmap.a
-LDLIBS += engine/libengine.a
-LDLIBS += utils/libutils.a
+LDLIBS += $(wildcard lib/*.o) $(wildcard map/*.o) $(wildcard engine/*.o) $(wildcard utils/*.o)
+#LDLIBS += lib/misc.a
+#LDLIBS += map/libmap.a
+#LDLIBS += engine/libengine.a
+#LDLIBS += utils/libutils.a
 
 
 ifneq ($(PLATFORM),PLATFORM_WEB)
@@ -486,7 +487,7 @@ ifeq ($(PLATFORM),PLATFORM_ANDROID)
 else
     MAKEFILE_PARAMS = $(PROJECT_NAME)
 endif
-export
+export BUILD_MODE
 # Default target entry
 # NOTE: We call this Makefile target or Makefile.Android target
 all: clean
@@ -505,6 +506,7 @@ $(PROJECT_NAME): $(OBJS)
 # Compile source files
 # NOTE: This pattern will compile every module defined on $(OBJS)
 #%.o: %.c
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
 # Clean everything
