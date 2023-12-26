@@ -69,9 +69,3 @@ void write_noise_to_file3d(float* noiseData, int size, char* filename){
     }
     fclose(f);
 }
-
-
-
-float get_noise_data3d(float* noise, int x, int y, int z, int size){
-    return noise[(y*size+x)*size+z];
-}

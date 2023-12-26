@@ -1,12 +1,10 @@
-CXX     = g++
+CXX      = g++
 CXXFLAGS  = -Wall -g
 LDFLAGS =
-AR = ar
 
 ifeq ($(PLATFORM),PLATFORM_WEB)
-CXX = em++
-AR = emar
-CFLAGS += -I/usr/local/include -std=c++14
+CC = em++
+CXXFLAGS += -I/usr/include
 endif
 
 SRCS := $(wildcard *.cpp)
@@ -14,13 +12,11 @@ OBJS = $(patsubst %.cpp,%.o,$(SRCS))
 
 .PHONY: all clean
 
-all: clean libnoise.a
+all: clean $(OBJS)
 
 %.o: %.cpp
 	$(CXX) -o $@ $^ -c $(CXXFLAGS) $(LDFLAGS)
 
-libnoise.a: $(OBJS)
-	$(AR) rcs libnoise.a $^
 
 clean:
-	rm -rf libnoise.a $(OBJS) *.o *.a
+	rm -rf $(OBJS) *.o

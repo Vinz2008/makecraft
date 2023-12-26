@@ -448,7 +448,7 @@ LDLIBS += -ltpl
 endif
 endif
 
-LDLIBS += $(wildcard lib/*.o) $(wildcard map/*.o) $(wildcard engine/*.o) $(wildcard utils/*.o)
+LDLIBS += $(wildcard lib/*.o) $(wildcard map/*.o) $(wildcard engine/*.o) $(wildcard utils/*.o) $(wildcard game/*.o)
 #LDLIBS += lib/misc.a
 #LDLIBS += map/libmap.a
 #LDLIBS += engine/libengine.a
@@ -497,6 +497,7 @@ all: clean
 	$(MAKE) -C map/
 	$(MAKE) -C engine/
 	$(MAKE) -C utils/
+	$(MAKE) -C game/
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME
@@ -542,6 +543,7 @@ endif
 	$(MAKE) -C lib/ clean
 	$(MAKE) -C map/ clean
 	$(MAKE) -C engine/ clean
+	$(MAKE) -C game/ clean
 	@echo Cleaning done
 
 raylib:

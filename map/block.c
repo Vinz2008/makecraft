@@ -7,6 +7,7 @@
 #include "chunk.h"
 #include "../engine/cube_render.h"
 #include "../makecraft.h"
+#include "../game/textures.h"
 
 extern Texture2D DirtTexture;
 extern Texture2D StoneTexture;
@@ -44,10 +45,7 @@ void destroyBlockArray(BlockArray* blockArray){
 
 BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
     BlockArray* newBlockArray = malloc(sizeof(BlockArray));
-    printf("TEST\n");
     initBlockArray(newBlockArray, blockArray->size);
-    printf("TEST %ld\n", blockArray->used);
-    int posNewArray = 0;
     memmove(newBlockArray->blockArray, blockArray->blockArray, (index)*sizeof(Block)); 
     memmove(newBlockArray->blockArray+index, blockArray->blockArray+(index+1), (blockArray->used - index - 1)*sizeof(Block)); 
     newBlockArray->size = blockArray->size;
@@ -60,9 +58,7 @@ BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
             printf("TEST in loop 2\n");
         }
     }*/
-    printf("TEST\n");
     free(blockArray);
-    printf("TEST\n");
     return newBlockArray;
 }
 
@@ -76,19 +72,10 @@ BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
     //DrawModel(tempCube, (Vector3){x, y, z}, 1,RED);
     //DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
     //DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
-    Texture2D* texture2dBlock = NULL;
+    //Texture2D* texture2dBlock = NULL;
+    Texture2D texture2dBlock = getBlockTexture(texture);
     Color col = WHITE;
-    if (texture == dirt_texture){
-        texture2dBlock = &DirtTexture;
-    }  else if (texture == stone_texture){
-        texture2dBlock = &StoneTexture;
-    } else if (texture == water_texture){
-        texture2dBlock = &WaterTexture;
-        col = CLITERAL(Color){ 255, 255, 255, 200 };
-    } else {
-        texture2dBlock = &EmptyTexture;
-    }
-    DrawCubeTexture(*texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , col);
+    DrawCubeTexture(texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , col);
     //return tempBlock;
 }
 

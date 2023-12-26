@@ -1,14 +1,3 @@
-/*******************************************************************************************
-*
-*   To compile example, just press F5.
-*   Note that compiled executable is placed in the same folder as .c file
-*
-*   You can find all basic examples on C:\raylib\raylib\examples folder or
-*   raylib official webpage: www.raylib.com
-
-*
-********************************************************************************************/
-
 #include "makecraft.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +31,7 @@
 #include "map/serialize.h"
 #include "noise/noise2.h"
 #include "utils/list.h"
+#include "game/textures.h"
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330
@@ -250,15 +240,22 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - PLAYER_HEIGHT, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
-    Image DirtTextureMap = LoadImage("textures/dirt.png");
+    
+    /*Image DirtTextureMap = LoadImage("textures/dirt.png");
     Image StoneTextureMap = LoadImage("textures/stone.png");
     Image WaterTextureMap = LoadImage("textures/water.png");
     Image EmptyTextureMap = LoadImage("textures/empty.png");
     DirtTexture = LoadTextureFromImage(DirtTextureMap);
     StoneTexture = LoadTextureFromImage(StoneTextureMap);
     WaterTexture = LoadTextureFromImage(WaterTextureMap);
-    EmptyTexture = LoadTextureFromImage(EmptyTextureMap);
-    shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
+    EmptyTexture = LoadTextureFromImage(EmptyTextureMap);*/
+    /*DirtTexture = getBlockTexture(dirt_texture);
+    StoneTexture = getBlockTexture(stone_texture);
+    WaterTexture = getBlockTexture(water_texture);
+    EmptyTexture = getBlockTexture(empty_texture);*/
+    
+    // TODO : maybe try to make this work
+    /*shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
     int ambientLoc = GetShaderLocation(shader, "ambient");
     float locIndex[] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -267,7 +264,7 @@ int main(int argc, char* argv[]){
     lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 10, 10, 10 }, Vector3Zero(), YELLOW, shader);
     lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, shader);
     lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, shader);
-    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);
+    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);*/
 
 
     Rectangle textBox = {10, 10,  screenWidth/1.1, screenHeight/1.1};
@@ -277,7 +274,6 @@ int main(int argc, char* argv[]){
     bool mouseOnText = false;
     int framesCounter = 0;
     int letterCount = 0;
-    //int timeDeltaJump = 0;
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     elevation = (float**)malloc(sizeof(float*) * 1000);
@@ -347,7 +343,7 @@ int main(int argc, char* argv[]){
             falling_speed = 0;
             if (IsKeyDown(KEY_SPACE)){
             //CameraMoveUp(&player.camera, 0.30f);
-            // falling_speed -= 2.0f; // BIG JUMP (maybe add this as an effect or a parameter)
+            // falling_speed -= 2.0f; // BIG JUMP (TODO : maybe add this as an effect or a parameter)
                falling_speed -= 0.9f;
             }
         }
@@ -462,11 +458,11 @@ int main(int argc, char* argv[]){
     //--------------------------------------------------------------------------------------
     tpl_serialize_block_array(blockArray, "blockArray.tpl");
     destroyBlockArray(blockArray);
-    UnloadImage(DirtTextureMap);
+    //UnloadImage(DirtTextureMap);
     UnloadTexture(DirtTexture);
-    UnloadImage(StoneTextureMap);
+    //UnloadImage(StoneTextureMap);
     UnloadTexture(StoneTexture);
-    UnloadImage(WaterTextureMap);
+    //UnloadImage(WaterTextureMap);
     UnloadTexture(WaterTexture);
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
