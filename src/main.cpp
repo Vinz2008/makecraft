@@ -98,10 +98,10 @@ static Vector2 lastMousePos;
 //static Vector3 movement = {0, -0.2f, 0};
 //static Vector3 rotation;
 // Add a struct with all textures and create an init function which return a struct with all textures
-Texture2D DirtTexture;
+/*Texture2D DirtTexture;
 Texture2D StoneTexture;
 Texture2D WaterTexture;
-Texture2D EmptyTexture;
+Texture2D EmptyTexture;*/
 Shader shader;
 
 Vector3* cubeArrayPos;
@@ -459,11 +459,12 @@ int main(int argc, char* argv[]){
     tpl_serialize_block_array(blockArray, "blockArray.tpl");
     destroyBlockArray(blockArray);
     //UnloadImage(DirtTextureMap);
-    UnloadTexture(DirtTexture);
+    //UnloadTexture(DirtTexture);
     //UnloadImage(StoneTextureMap);
-    UnloadTexture(StoneTexture);
+    //UnloadTexture(StoneTexture);
     //UnloadImage(WaterTextureMap);
-    UnloadTexture(WaterTexture);
+    //UnloadTexture(WaterTexture);
+    UnloadCachedTextures();
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
     free(elevation);

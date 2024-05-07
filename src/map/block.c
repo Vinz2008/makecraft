@@ -9,10 +9,10 @@
 #include "../makecraft.h"
 #include "../textures.h"
 
-extern Texture2D DirtTexture;
+/*extern Texture2D DirtTexture;
 extern Texture2D StoneTexture;
 extern Texture2D WaterTexture;
-extern Texture2D EmptyTexture;
+extern Texture2D EmptyTexture;*/
 
 void initBlockArray(BlockArray* blockArray, size_t initalSize){
     blockArray->blockArray = malloc(sizeof(Block) * initalSize);

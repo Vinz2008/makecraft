@@ -3,12 +3,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <optional>
 
-std::map<int, Texture2D*> cachedTextures;
-
+std::unordered_map<int, Texture2D*> cachedTextures;
 
 struct _texturePath {
     int key;
@@ -50,4 +49,10 @@ extern "C" Texture2D getBlockTexture(enum material m){
     addToCachedTextures(generatedTexture, pos);
     //UnloadImage(TempTextureMap);
     return generatedTexture;
+}
+
+extern "C" void UnloadCachedTextures(){
+    for ( const auto &t : cachedTextures){
+        UnloadTexture(*t.second);
+    }
 }

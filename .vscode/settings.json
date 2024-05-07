@@ -98,6 +98,7 @@
         "makecraft.h": "c",
         "raylib.h": "c",
         "stdlib.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "__locale": "cpp"
     }
 }

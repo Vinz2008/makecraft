@@ -79,8 +79,7 @@ void DrawCubeTexture(Texture2D texture, Vector3 position, float width, float hei
 }
 
 // Draw cube with texture piece applied to all faces
-void DrawCubeTextureRec(Texture2D texture, Rectangle source, Vector3 position, float width, float height, float length, Color color)
-{
+/*void DrawCubeTextureRec(Texture2D texture, Rectangle source, Vector3 position, float width, float height, float length, Color color){
     float x = position.x;
     float y = position.y;
     float z = position.z;
@@ -164,4 +163,4 @@ void DrawCubeTextureRec(Texture2D texture, Rectangle source, Vector3 position, f
     rlEnd();
 
     rlSetTexture(0);
-}
+}*/
