@@ -40,6 +40,7 @@ void DrawCubeTexture(Texture2D texture, Vector3 position, float width, float hei
             rlTexCoord2f(0.0f, 1.0f); rlVertex3f(x + width/2, y + height/2, z - length/2);  // Top Left Of The Texture and Quad
             rlTexCoord2f(0.0f, 0.0f); rlVertex3f(x + width/2, y - height/2, z - length/2);  // Bottom Left Of The Texture and Quad
             }
+            //printf("is top cub next to cube : %d\n", !isCubeNextToCube(blockArray, direction_top, (Block){position.x, position.y, position.z, 0}));
             if (!isCubeNextToCube(blockArray, direction_top, (Block){position.x, position.y, position.z, 0})){
             // Top Face
             rlNormal3f(0.0f, 1.0f, 0.0f);       // Normal Pointing Up

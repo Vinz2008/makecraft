@@ -1,4 +1,4 @@
-#define NB_BLOCK_NOISE 100
+#define NB_BLOCK_NOISE 150
 
 std::vector<float> generate_noise(int size, int seed,float frequency);
 void write_noise_to_file(std::vector<float> noiseData, int size, const char* filename);

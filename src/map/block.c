@@ -80,23 +80,28 @@ BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
 }
 
 
+bool equalf(float a, float b, float epsilon){
+  return fabs(a - b) < epsilon;
+}
+
 bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block){
+    //printf("blockArray->used : %ld\n", blockArray->used);
     for (int i = 0; i < blockArray->used; i++){
-        Block* tempBlock = &blockArray->blockArray[i];
+        Block* tempBlock = blockArray->blockArray + i;
+        printf("pos 1 block.y + CUBE_SIZE : %f, pos 2 blockArray->blockArray[%d].y y : %f\n", block.y + CUBE_SIZE, i, tempBlock->y); // TODO : why i is always 0 ??
         switch (direction){
         case direction_top:
-            //printf("pos 1 y : %f, pos 2 y : %f\n", block.y + CUBE_SIZE, blockArray->blockArray[i].y);
             return tempBlock->y == block.y + CUBE_SIZE;
         case direction_bottom:
             return block.y - CUBE_SIZE == tempBlock->y;
         case direction_right:
-            return block.x + CUBE_SIZE == tempBlock->x;
+            return equalf(block.x + CUBE_SIZE, tempBlock->x, CUBE_SIZE/2);
         case direction_left:
-            return block.x - CUBE_SIZE == tempBlock->x;
+            return equalf(block.x - CUBE_SIZE, tempBlock->x, CUBE_SIZE/2);
         case direction_front:
-            return block.z + CUBE_SIZE == tempBlock->z;
+            return equalf(block.z + CUBE_SIZE, tempBlock->z, CUBE_SIZE/2);
         case direction_back:
-            return block.z - CUBE_SIZE == tempBlock->z;
+            return equalf(block.z - CUBE_SIZE, tempBlock->z, CUBE_SIZE/2);
         }
     }
     return false;

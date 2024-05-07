@@ -46,45 +46,20 @@
     #define CAMERA_ROTATION_SPEED                           0.03f
 #endif
 
-
 #define PLAYER_MOVEMENT_SENSITIVITY 1.5
 #define CAMERA_MOUSE_MOVE_SENSITIVITY 0.001f
 #define CAMERA_MOVE_SPEED  0.5f
 
 #define PLAYER_HEIGHT 1.0f
 
-/*struct blockColumn {
-    Block* blockArray;
-    size_t used;
-    size_t size;
-};*/
-
-/*typedef struct {
-    Vector3 cubeCenter;
-    Vector3 cubeTopRight;
-    Vector3 cubeTopLeft;
-    struct blockColumn* BlockColumn;
-}CHUNK;*/
-
-/*typedef struct {
-    CHUNK* chunk;
-    size_t size;
-    size_t used;
-} chunkList;*/
-
-
-
 typedef struct {
     Camera camera;
-}Player;
+} Player;
 
 Player player; 
 
-
-
 BlockArray* blockArray;
 list_t* chunkArray;
-
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -97,11 +72,6 @@ BoundingBox GroundHitBox = {0};
 static Vector2 lastMousePos;
 //static Vector3 movement = {0, -0.2f, 0};
 //static Vector3 rotation;
-// Add a struct with all textures and create an init function which return a struct with all textures
-/*Texture2D DirtTexture;
-Texture2D StoneTexture;
-Texture2D WaterTexture;
-Texture2D EmptyTexture;*/
 Shader shader;
 
 Vector3* cubeArrayPos;
@@ -116,7 +86,6 @@ int pos_hud = 0;
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
 //static void UpdateDrawFrame(void);          // Update and draw one frame
-
 
 bool isNumberAround(float nb, float nb2, float precision){
     return ((nb <= nb2 && nb >= nb2 - precision) || (nb >= nb2 && nb <= nb2 + precision));
@@ -240,20 +209,7 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - PLAYER_HEIGHT, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
-    
-    /*Image DirtTextureMap = LoadImage("textures/dirt.png");
-    Image StoneTextureMap = LoadImage("textures/stone.png");
-    Image WaterTextureMap = LoadImage("textures/water.png");
-    Image EmptyTextureMap = LoadImage("textures/empty.png");
-    DirtTexture = LoadTextureFromImage(DirtTextureMap);
-    StoneTexture = LoadTextureFromImage(StoneTextureMap);
-    WaterTexture = LoadTextureFromImage(WaterTextureMap);
-    EmptyTexture = LoadTextureFromImage(EmptyTextureMap);*/
-    /*DirtTexture = getBlockTexture(dirt_texture);
-    StoneTexture = getBlockTexture(stone_texture);
-    WaterTexture = getBlockTexture(water_texture);
-    EmptyTexture = getBlockTexture(empty_texture);*/
-    
+     
     // TODO : maybe try to make this work
     /*shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
@@ -265,7 +221,6 @@ int main(int argc, char* argv[]){
     lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, shader);
     lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, shader);
     lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);*/
-
 
     Rectangle textBox = {10, 10,  screenWidth/1.1, screenHeight/1.1};
     Ray ray = { 0 };
@@ -374,8 +329,6 @@ int main(int argc, char* argv[]){
             else collision.hit = false;
         }    
 
-
-
         } else {
             if (IsKeyPressed(KEY_UP)){
                 pos_hud = (pos_hud-1 < 0) ? NUMBER_BUTTON_MENU-1 : pos_hud-1;
@@ -414,7 +367,6 @@ int main(int argc, char* argv[]){
                 Block blocktemp = blockArray->blockArray[i];
                 createBlock(blockArray, blocktemp.x, blocktemp.y, blocktemp.z, blocktemp.material);
             }
-
 
         EndMode3D();
         DrawLine(screenWidth/2, screenHeight/2, screenWidth/2 , screenHeight/2 - screenHeight/20, GRAY);
@@ -458,12 +410,6 @@ int main(int argc, char* argv[]){
     //--------------------------------------------------------------------------------------
     tpl_serialize_block_array(blockArray, "blockArray.tpl");
     destroyBlockArray(blockArray);
-    //UnloadImage(DirtTextureMap);
-    //UnloadTexture(DirtTexture);
-    //UnloadImage(StoneTextureMap);
-    //UnloadTexture(StoneTexture);
-    //UnloadImage(WaterTextureMap);
-    //UnloadTexture(WaterTexture);
     UnloadCachedTextures();
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
