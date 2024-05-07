@@ -7,7 +7,7 @@
 #include "chunk.h"
 #include "../engine/cube_render.h"
 #include "../makecraft.h"
-#include "../game/textures.h"
+#include "../textures.h"
 
 extern Texture2D DirtTexture;
 extern Texture2D StoneTexture;

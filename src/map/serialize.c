@@ -13,7 +13,7 @@ void tpl_serialize_chunk_array(){
     tn = tpl_map("A(S(A(S(fffi)fff))");
 }
 
-void tpl_serialize_block_array(BlockArray* blockArray, char* filename){
+void tpl_serialize_block_array(BlockArray* blockArray, const char* filename){
     tpl_node *tn;
     Block tmp;
     tn = tpl_map("A(S(fffi))", &tmp);
@@ -25,7 +25,7 @@ void tpl_serialize_block_array(BlockArray* blockArray, char* filename){
     tpl_free(tn);
 }
 
-BlockArray* tpl_deserialize_block_array(char* filename){
+BlockArray* tpl_deserialize_block_array(const char* filename){
     tpl_node *tn;
     Block tmp;
     tn = tpl_map("A(S(fffi))", &tmp);

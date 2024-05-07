@@ -14,7 +14,7 @@
 #include "rcamera.h"
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
-#include "lib/startswith.h"
+#include "utils/startswith.h"
 #include "lua_api/lua_api.h"
 #ifdef WIN32
 #include <io.h>
@@ -29,9 +29,9 @@
 #include "map/generation.h"
 #include "map/water.h"
 #include "map/serialize.h"
-#include "noise/noise2.h"
+#include "noise2.h"
 #include "utils/list.h"
-#include "game/textures.h"
+#include "textures.h"
 
 #if defined(PLATFORM_DESKTOP)
     #define GLSL_VERSION            330

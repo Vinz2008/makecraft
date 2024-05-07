@@ -21,7 +21,7 @@ std::vector<float> generate_noise(int size, int seed, float frequency){
     return noiseOutput;
 }
 
-void write_noise_to_file(std::vector<float> noiseData, int size, char* filename){
+void write_noise_to_file(std::vector<float> noiseData, int size, const char* filename){
     FILE* f = fopen(filename, "w");
     for (int y = 0; y < size; y++){
     for (int x = 0; x < size; x++) {

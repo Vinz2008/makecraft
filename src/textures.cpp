@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "../makecraft.h"
+#include "makecraft.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

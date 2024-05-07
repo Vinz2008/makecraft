@@ -26,7 +26,8 @@
 # Define required raylib variables
 PROJECT_NAME       ?= makecraft
 RAYLIB_VERSION     ?= 4.0.0
-RAYLIB_PATH        ?= ..
+#RAYLIB_PATH        ?= ..
+RAYLIB_PATH        ?= ~/raylib/
 
 #RAYLIB_INCLUDE_PATH   ?= /usr/local/include
 RAYLIB_INCLUDE_PATH   ?= /usr/include
@@ -57,7 +58,8 @@ RAYLIB_H_INSTALL_PATH ?= $(DESTDIR)/include
 RAYLIB_LIBTYPE        ?= STATIC
 
 # Build mode for project: DEBUG or RELEASE
-BUILD_MODE            ?= RELEASE
+#BUILD_MODE            ?= RELEASE
+BUILD_MODE            ?= DEBUG
 
 # Use external GLFW library instead of rglfw module
 # TODO: Review usage on Linux. Target version of choice. Switch on -lglfw or -lglfw3
@@ -128,7 +130,7 @@ endif
 # TODO: Do we really need this?
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),LINUX)
-        RAYLIB_PREFIX  ?= ..
+        RAYLIB_PREFIX  ?= ~/raylib/
         RAYLIB_PATH     = $(realpath $(RAYLIB_PREFIX))
     endif
 endif
@@ -448,11 +450,8 @@ LDLIBS += -ltpl
 endif
 endif
 
-LDLIBS += $(wildcard lib/*.o) $(wildcard map/*.o) $(wildcard engine/*.o) $(wildcard utils/*.o) $(wildcard game/*.o)
-#LDLIBS += lib/misc.a
-#LDLIBS += map/libmap.a
-#LDLIBS += engine/libengine.a
-#LDLIBS += utils/libutils.a
+#LDLIBS += $(SRC_OBJS)
+#LDLIBS += $(wildcard lib/*.o) $(wildcard map/*.o) $(wildcard engine/*.o) $(wildcard utils/*.o) $(wildcard game/*.o)
 
 
 ifneq ($(PLATFORM),PLATFORM_WEB)
@@ -467,17 +466,19 @@ endif
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
 # Define all source files required
-#SRC_DIR = src
-SRC_DIR = .
+SRC_DIR = src
+#SRC_DIR = .
 #OBJ_DIR = obj
 OBJ_DIR = .
 
 # Define all object files from source files
-SRC = $(call rwildcard, *.cpp, *.h)
+#SRC = $(call rwildcard, *.cpp, *.h)
 #OBJS = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-#OBJS ?= main.c
-OBJS =\
-main.o \
+#SRCS = $(wildcard src/*.cpp) $(wildcard src/lua/*.cpp) $(wildcard src/map/*.cpp) $(wildcard src/utils/*.cpp)
+SRCS_C = $(call rwildcard, ./src,*.c)
+SRCS_CPP = $(call rwildcard, ./src/,*.cpp)
+#OBJS := $(addsuffix .o,$(basename $(SRCS)))
+OBJS = $(patsubst %.cpp,%.cpp.o,$(SRCS_CPP)) $(patsubst %.c,%.c.o,$(SRCS_C))
 
 # For Android platform we call a custom Makefile.Android
 ifeq ($(PLATFORM),PLATFORM_ANDROID)
@@ -491,13 +492,13 @@ export BUILD_MODE
 # Default target entry
 # NOTE: We call this Makefile target or Makefile.Android target
 all: clean
-	$(MAKE) -C noise/
-	$(MAKE) -C lib/
-	$(MAKE) -C lua_api/
-	$(MAKE) -C map/
-	$(MAKE) -C engine/
-	$(MAKE) -C utils/
-	$(MAKE) -C game/
+# 	$(MAKE) -C noise/
+# 	$(MAKE) -C lib/
+# 	$(MAKE) -C lua_api/
+# 	$(MAKE) -C map/
+# 	$(MAKE) -C engine/
+# 	$(MAKE) -C utils/
+# 	$(MAKE) -C game/
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME
@@ -508,8 +509,12 @@ $(PROJECT_NAME): $(OBJS)
 # NOTE: This pattern will compile every module defined on $(OBJS)
 #%.o: %.c
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+%.cpp.o: %.cpp
 	$(CXX) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
+
+%.c.o: %.c
+	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
+
 # Clean everything
 clean:
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
@@ -538,12 +543,13 @@ ifeq ($(PLATFORM_OS),LINUX)
 	rm -f *.o *.html *.js
 endif
 endif
-	$(MAKE) -C noise/ clean
-	$(MAKE) -C lua_api/ clean
-	$(MAKE) -C lib/ clean
-	$(MAKE) -C map/ clean
-	$(MAKE) -C engine/ clean
-	$(MAKE) -C game/ clean
+# 	$(MAKE) -C noise/ clean
+# 	$(MAKE) -C lua_api/ clean
+# 	$(MAKE) -C lib/ clean
+# 	$(MAKE) -C map/ clean
+# 	$(MAKE) -C engine/ clean
+# 	$(MAKE) -C game/ clean
+	rm -f $(OBJS)
 	@echo Cleaning done
 
 raylib:
