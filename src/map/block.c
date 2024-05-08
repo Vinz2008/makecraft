@@ -88,10 +88,10 @@ bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block){
     //printf("blockArray->used : %ld\n", blockArray->used);
     for (int i = 0; i < blockArray->used; i++){
         Block* tempBlock = blockArray->blockArray + i;
-        printf("pos 1 block.y + CUBE_SIZE : %f, pos 2 blockArray->blockArray[%d].y y : %f\n", block.y + CUBE_SIZE, i, tempBlock->y); // TODO : why i is always 0 ??
+        //printf("pos 1 block.y + CUBE_SIZE : %f, pos 2 blockArray->blockArray[%d].y y : %f\n", block.y + CUBE_SIZE, i, tempBlock->y); // TODO : why i is always 0 ??
         switch (direction){
         case direction_top:
-            return tempBlock->y == block.y + CUBE_SIZE;
+            return block.y + CUBE_SIZE == tempBlock->y;
         case direction_bottom:
             return block.y - CUBE_SIZE == tempBlock->y;
         case direction_right:
@@ -102,6 +102,9 @@ bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block){
             return equalf(block.z + CUBE_SIZE, tempBlock->z, CUBE_SIZE/2);
         case direction_back:
             return equalf(block.z - CUBE_SIZE, tempBlock->z, CUBE_SIZE/2);
+        default:
+            fprintf(stderr, "unknown direction");
+            exit(1);
         }
     }
     return false;

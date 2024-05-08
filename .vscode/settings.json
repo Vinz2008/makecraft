@@ -99,6 +99,19 @@
         "raylib.h": "c",
         "stdlib.h": "c",
         "string.h": "c",
-        "__locale": "cpp"
+        "__locale": "cpp",
+        "rlgl.h": "c",
+        "format": "cpp",
+        "span": "cpp",
+        "__bit_reference": "cpp",
+        "__config": "cpp",
+        "__hash_table": "cpp",
+        "__node_handle": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "__verbose_abort": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "queue": "cpp"
     }
 }

@@ -14,6 +14,7 @@
 #include "rcamera.h"
 #define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
+#include "rlgl.h"
 #include "utils/startswith.h"
 #include "lua_api/lua_api.h"
 #ifdef WIN32
@@ -150,7 +151,7 @@ int main(int argc, char* argv[]){
     int seed = 164647;
     //int seed = rand() * 167 * rand();
     float frequency = 0.05;
-    std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency);
+    std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency, 0, 0);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
     //float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
 #else
@@ -231,6 +232,8 @@ int main(int argc, char* argv[]){
     int letterCount = 0;
     SetConfigFlags(FLAG_VSYNC_HINT);
     SetConfigFlags(FLAG_MSAA_4X_HINT);
+    //rlEnableBackfaceCulling();
+    //rlDisableBackfaceCulling();
     elevation = (float**)malloc(sizeof(float*) * 1000);
     float falling_speed = 0;
     //--------------------------------------------------------------------------------------
