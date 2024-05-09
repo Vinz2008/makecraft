@@ -3,6 +3,13 @@
 
 #define list_foreach(data, list) for (int i = 0, void* data = NULL; i < list->used ; i++, data = list->list[i].data)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef _LIST_HEADER_
+#define _LIST_HEADER_
+
 struct listItem {
     void* data;
 };
@@ -23,3 +30,9 @@ list_t* list_remove(void* data, list_t* list);
 list_t* list_remove_index(int index, list_t* list);
 void* list_find(void* data, list_t* list);
 void* list_find_at(int index, list_t* list);
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif

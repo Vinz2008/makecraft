@@ -18,4 +18,7 @@ enum game_mode {
 
 #define NUMBER_BUTTON_MENU 3
 
+#define NOISE_SEED 164647
+#define NOISE_FREQUENCY 0.05
+
 #endif

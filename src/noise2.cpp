@@ -1,15 +1,19 @@
+#include "noise2.h"
 #include <cstdio>
-#include <vector>
+#include <optional>
 #include <FastNoise/FastNoise.h>
 
+std::optional<FastNoise::SmartNode<>> fnGenerator = std::nullopt;
 
 // TODO : replace blockarray with a system with a list of chunks which some are visible, others not. chunks are list of list of lists of blocks (3d array) and they are generated using the xstart and y start
 std::vector<float> generate_noise(int size, int seed, float frequency, int xstart, int ystart){
-    FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "GQATAMP1KD8NAAQAAAAAAABACQAAAAAAPwAAAAAAAQQAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
+    if (!fnGenerator.has_value()){
+        fnGenerator = std::optional<FastNoise::SmartNode<>>{FastNoise::NewFromEncodedNodeTree( "GQATAMP1KD8NAAQAAAAAAABACQAAAAAAPwAAAAAAAQQAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")};
+    }
     std::vector<float> noiseOutput(size * size);
 
     // Generate a size x size x size area of noise
-    fnGenerator->GenUniformGrid2D(noiseOutput.data(), xstart, ystart, size, size, frequency, seed);
+    fnGenerator.value()->GenUniformGrid2D(noiseOutput.data(), xstart, ystart, size, size, frequency, seed);
     //int index = 0;
 
     FILE* f = fopen("noise2.txt", "w");
@@ -35,7 +39,7 @@ void write_noise_to_file(std::vector<float> noiseData, int size, const char* fil
 }
 
 
-float get_noise_data(std::vector<float> noise, int x, int y, int size){
+float get_noise_data(std::vector<float>& noise, int x, int y, int size){
     return noise[y*size+x];
 }
 

@@ -112,6 +112,9 @@
         "__verbose_abort": "cpp",
         "ios": "cpp",
         "locale": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "ranges": "cpp",
+        "stack": "cpp",
+        "list.h": "c"
     }
 }

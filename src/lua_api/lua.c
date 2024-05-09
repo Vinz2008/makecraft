@@ -16,13 +16,13 @@ int lua_printTest(lua_State *L){
     return 1;
 }
 
-int lua_createChunk(lua_State *L){
+/*int lua_createChunk(lua_State *L){
     float x_chunk = luaL_checknumber(L, 1);
     float y_chunk = luaL_checknumber(L, 2);
     float z_chunk = luaL_checknumber(L, 3);
     createChunk(blockArray, x_chunk, y_chunk, z_chunk);
     return 1;
-}
+}*/
 
 int lua_createBlock(lua_State *L){
     float x_block = (float)luaL_checknumber(L, 1);
@@ -44,8 +44,8 @@ void runLuaFile(char* filename){
     lua_setglobal(L, "makecraftPrintTest");
     lua_pushcfunction(L, lua_createBlock);
     lua_setglobal(L, "createBlock");
-    lua_pushcfunction(L, lua_createChunk);
-    lua_setglobal(L, "createChunk");
+    //lua_pushcfunction(L, lua_createChunk);
+    //lua_setglobal(L, "createChunk");
     if (luaL_dofile(L, filename) == LUA_OK) {
         lua_pop(L, lua_gettop(L));
     }

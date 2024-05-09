@@ -59,7 +59,11 @@ typedef struct {
 
 Player player; 
 
+
+
 BlockArray* blockArray;
+// contain Chunk values that are loaded
+// TODO : will need not open the whole save file and lazy load it by having a way to calculate the place in the file where it will be
 list_t* chunkArray;
 
 //----------------------------------------------------------------------------------
@@ -138,7 +142,7 @@ bool isPlayerOnTopOfBlockOfWater(Player player, BlockArray* blockArray){
 }
 
 #ifdef PLATFORM_WEB
-float get_noise_data(std::vector<float> noise, int x, int y, int size){
+float get_noise_data(std::vector<float>& noise, int x, int y, int size){
 
 }
 #endif
@@ -148,9 +152,9 @@ float get_noise_data(std::vector<float> noise, int x, int y, int size){
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
 #ifndef PLATFORM_WEB
-    int seed = 164647;
+    int seed = NOISE_SEED;
     //int seed = rand() * 167 * rand();
-    float frequency = 0.05;
+    float frequency = NOISE_FREQUENCY;
     std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency, 0, 0);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
     //float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
@@ -173,6 +177,7 @@ int main(int argc, char* argv[]){
         tpl_serialize_block_array(blockArray, "blockArray.tpl");
     }
     printf("blockArraysize : %ld\n", blockArray->used);
+    //chunkArray = get_new_perlin_chunk_list(); // TODO : fix the segmentation fault
     //serialize_block_array(blockArray, "blockArray.bin");
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
