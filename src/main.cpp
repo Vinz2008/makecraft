@@ -153,11 +153,9 @@ float get_noise_data(std::vector<float>& noise, int x, int y, int size){
 int main(int argc, char* argv[]){
 #ifndef PLATFORM_WEB
     int seed = NOISE_SEED;
-    //int seed = rand() * 167 * rand();
     float frequency = NOISE_FREQUENCY;
     std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency, 0, 0);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
-    //float fl = get_noise_data(farray, 5, 4, NB_BLOCK_NOISE);
 #else
     std::vector<float> farray;
 #endif
@@ -178,7 +176,6 @@ int main(int argc, char* argv[]){
     }
     printf("blockArraysize : %ld\n", blockArray->used);
     //chunkArray = get_new_perlin_chunk_list(); // TODO : fix the segmentation fault
-    //serialize_block_array(blockArray, "blockArray.bin");
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
     if (argc > 0){
@@ -188,7 +185,6 @@ int main(int argc, char* argv[]){
                 printf("found in %s\n", argv[i]);
                 printf("filename_lua = %s\n", argv[i+1]);
                 filename_lua = argv[i+1];
-                //i++; 
             }
         }
     }
@@ -215,18 +211,6 @@ int main(int argc, char* argv[]){
     PlayerPositionFloor = (Vector3){player.camera.position.x , player.camera.position.y - PLAYER_HEIGHT, player.camera.position.z};
     PlayerHitBox = (BoundingBox){PlayerPositionFloor, PlayerPosition};
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
-     
-    // TODO : maybe try to make this work
-    /*shader = LoadShader(TextFormat("shaders/glsl%i/lighting.vs", GLSL_VERSION), TextFormat("shaders/glsl%i/lighting.fs", GLSL_VERSION));
-    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
-    int ambientLoc = GetShaderLocation(shader, "ambient");
-    float locIndex[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    SetShaderValue(shader, ambientLoc, locIndex, SHADER_UNIFORM_VEC4);
-    Light lights[MAX_LIGHTS] = { 0 };
-    lights[0] = CreateLight(LIGHT_POINT, (Vector3){ 10, 10, 10 }, Vector3Zero(), YELLOW, shader);
-    lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, shader);
-    lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, shader);
-    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);*/
 
     Rectangle textBox = {10, 10,  screenWidth/1.1, screenHeight/1.1};
     Ray ray = { 0 };
@@ -246,7 +230,6 @@ int main(int argc, char* argv[]){
 #if 0
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
-    //SetCameraMode(player.camera, CAMERA_FIRST_PERSON);
     DisableCursor();
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -361,13 +344,9 @@ int main(int argc, char* argv[]){
             for (float x = 0; x < NB_BLOCK_NOISE; x++){
                 for (float y = 0; y < NB_BLOCK_NOISE; y++){
                     float znoise = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
-                    //float mult = 2.0f;
-                    //int texture = get_block_type(znoise);
                     if (znoise < 17){
                     createWater(blockArray, x*2.0f, y*2.0f, znoise+0.1, 10);
                     }
-                    //Block* tempBlock = createBlock(blockArray, x*mult, znoise*mult, y*mult, texture);
-                    //addToBlockArray(blockArray, *tempBlock);
                 }
             }
 

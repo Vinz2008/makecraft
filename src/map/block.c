@@ -9,11 +9,6 @@
 #include "../makecraft.h"
 #include "../textures.h"
 
-/*extern Texture2D DirtTexture;
-extern Texture2D StoneTexture;
-extern Texture2D WaterTexture;
-extern Texture2D EmptyTexture;*/
-
 void initBlockArray(BlockArray* blockArray, size_t initalSize){
     blockArray->blockArray = malloc(sizeof(Block) * initalSize);
     blockArray->used = 0;
@@ -50,33 +45,14 @@ BlockArray* removeFromBlockArray(int index, BlockArray* blockArray){
     memmove(newBlockArray->blockArray+index, blockArray->blockArray+(index+1), (blockArray->used - index - 1)*sizeof(Block)); 
     newBlockArray->size = blockArray->size;
     newBlockArray->used = blockArray->used;
-    /*for (int i = 0; i < blockArray->used; i++){
-        if (i != index){
-            printf("TEST in loop\n");
-            addToBlockArray(newBlockArray, blockArray->blockArray[posNewArray]);
-            posNewArray++;
-            printf("TEST in loop 2\n");
-        }
-    }*/
     free(blockArray);
     return newBlockArray;
 }
 
-/*Block**/ void createBlock(BlockArray* blockArray, float x, float y, float z, int texture){
-    /*Block* tempBlock = malloc(sizeof(Block));
-    tempBlock->x = x;
-    tempBlock->y = y;
-    tempBlock->z = z;*/
-    //addToBlockArray(blockArray, *tempBlock);
-    //Model tempCube = LoadModelFromMesh(GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE));
-    //DrawModel(tempCube, (Vector3){x, y, z}, 1,RED);
-    //DrawCube((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, RED);
-    //DrawCubeWires((Vector3){x, y, z}, CUBE_SIZE, CUBE_SIZE, CUBE_SIZE, BLACK);
-    //Texture2D* texture2dBlock = NULL;
+void createBlock(BlockArray* blockArray, float x, float y, float z, int texture){
     Texture2D texture2dBlock = getBlockTexture(texture);
     Color col = WHITE;
     DrawCubeTexture(texture2dBlock, (Vector3){x, y, z }, CUBE_SIZE , CUBE_SIZE , CUBE_SIZE , col);
-    //return tempBlock;
 }
 
 

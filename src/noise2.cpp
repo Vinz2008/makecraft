@@ -42,26 +42,3 @@ void write_noise_to_file(std::vector<float> noiseData, int size, const char* fil
 float get_noise_data(std::vector<float>& noise, int x, int y, int size){
     return noise[y*size+x];
 }
-
-/*float* generate_noise3d(int size, int seed){
-    FastNoise::SmartNode<> fnGenerator = FastNoise::NewFromEncodedNodeTree( "GQATAMP1KD8NAAQAAAAAAABACQAAAAAAPwAAAAAAAQQAAAAAAAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" );
-    std::vector<float> noiseOutput(size * size * size);
-
-    // Generate a size x size x size area of noise
-    fnGenerator->GenUniformGrid3D(noiseOutput.data(), 0, 0, 0, size, size, size, 0.2f, seed);
-    return &noiseOutput[0];
-}
-
-void write_noise_to_file3d(float* noiseData, int size, char* filename){
-    FILE* f = fopen(filename, "w");
-    for (int y = 0; y < size; y++){
-    for (int x = 0; x < size; x++) {
-        for (int z = 0; z < size; z++){
-            fprintf(f, " %f ", noiseData[(y*size+x)*size+z]);
-        }
-        fprintf(f, "\n");
-    }
-    fprintf(f, "\n");
-    }
-    fclose(f);
-}*/
