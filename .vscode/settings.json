@@ -115,6 +115,7 @@
         "queue": "cpp",
         "ranges": "cpp",
         "stack": "cpp",
-        "list.h": "c"
+        "list.h": "c",
+        "*.m": "cpp"
     }
 }

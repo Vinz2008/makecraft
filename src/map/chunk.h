@@ -18,7 +18,7 @@ struct ChunkBlocks {
 
 struct Chunk {
     //BlockArray* blockArray;
-    struct ChunkBlocks blocks;
+    struct ChunkBlocks* blocks;
     float x, y; // pos of chunk from the chunk level (1 x more is 1 chunk more)
 };
 
