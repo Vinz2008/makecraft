@@ -1,9 +1,3 @@
-#ifdef __cplusplus
-extern "C" {            // Prevents name mangling of functions
-#endif
+#include <vector>
 
-void createWater(BlockArray *blockArray, float x, float z, float ystart, float yend);
-
-#ifdef __cplusplus
-}
-#endif
+void drawWater(std::vector<Block> blockArray, float x, float z, float ystart, float yend);

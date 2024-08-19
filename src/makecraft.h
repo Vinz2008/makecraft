@@ -3,10 +3,11 @@
 #define MAKECRAFT_HEADER
 
 enum material {
-    water_texture = 0,
-    dirt_texture = -1,
-    stone_texture = -2,
-    empty_texture = -3,
+    invisible = 0,
+    water_texture = -1,
+    dirt_texture = -2,
+    stone_texture = -3,
+    empty_texture = -4,
 };
 
 enum game_mode {

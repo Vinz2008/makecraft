@@ -2,7 +2,9 @@
 extern "C" {
 #endif
 
-int get_block_type(int height);
+#include "../makecraft.h"
+
+enum material get_block_type(int height);
 
 #ifdef __cplusplus
 }

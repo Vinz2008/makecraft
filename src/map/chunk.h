@@ -1,5 +1,6 @@
 #include "block.h"
 #include "../utils/list.h"
+#include <vector>
 
 #define CHUNK_LENGTH 100
 
@@ -31,8 +32,8 @@ struct Chunk {
 
 //void createChunk(BlockArray* blockArray, float x, float y, float z);
 struct Chunk createChunk(float x, float y);
-list_t* get_new_perlin_chunk_list();
-void destroy_chunk_list(list_t* chunk_list);
+std::vector<Chunk> get_new_perlin_chunk_list();
+void destroy_chunk_list(std::vector<Chunk> chunk_list);
 
 #ifdef __cplusplus
 }

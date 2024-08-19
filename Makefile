@@ -75,6 +75,8 @@ BUILD_WEB_HEAP_SIZE   ?= 134217728
 BUILD_WEB_RESOURCES   ?= TRUE
 BUILD_WEB_RESOURCES_PATH  ?= textures
 
+PROFILING ?= FALSE
+
 # Use cross-compiler for PLATFORM_RPI
 ifeq ($(PLATFORM),PLATFORM_RPI)
     USE_RPI_CROSS_COMPILER ?= FALSE
@@ -458,7 +460,11 @@ ifneq ($(PLATFORM),PLATFORM_WEB)
 LDLIBS += -llua -lm
 LDLIBS += -lnoise 
 LDLIBS += -lFastNoise
+ifeq ($(PROFILING), TRUE)
+LDLIBS += -lprofiler
 endif
+endif
+
 
 
 

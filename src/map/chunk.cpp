@@ -24,21 +24,20 @@ struct Chunk get_new_perlin_chunk(float x, float y){
     return Chunk {.blocks = chunkBlocks, .x = x, .y = y};
 }
 
-list_t* get_new_perlin_chunk_list(){
-    list_t* chunk_list = list_create();
+std::vector<Chunk> get_new_perlin_chunk_list(){
+    std::vector<Chunk> chunk_list;
     for (int x = -RENDER_DISTANCE; x < RENDER_DISTANCE; x++){
         for (int y = -RENDER_DISTANCE; y < RENDER_DISTANCE; y++){
-            Chunk* chunk_temp = new Chunk(get_new_perlin_chunk(x*CHUNK_SIZE, y*CHUNK_SIZE));
-            list_append(chunk_temp, chunk_list);
+            chunk_list.push_back(get_new_perlin_chunk(x*CHUNK_SIZE, y*CHUNK_SIZE));
         }
     }
     return chunk_list;
 }
 
 // add map, find all, etc 
-bool iterate_chunk_list_is_true(list_t* chunk_list, std::function<bool (Block*)> f){
-    for (int i = 0; i < chunk_list->used; i++){
-        Chunk* temp_chunk = (Chunk*)chunk_list->list[i].data;
+bool iterate_chunk_list_is_true(std::vector<Chunk> chunk_list, std::function<bool (Block*)> f){
+    for (int i = 0; i < chunk_list.size(); i++){
+        Chunk* temp_chunk = &chunk_list.at(i);
         for (int x = 0; x < CHUNK_SIZE; x++){
             for (int y = 0; y < CHUNK_SIZE; y++){
                 for (int z = 0; z < CHUNK_HEIGHT; z++){
@@ -52,11 +51,9 @@ bool iterate_chunk_list_is_true(list_t* chunk_list, std::function<bool (Block*)>
     return false;
 }
 
-void destroy_chunk_list(list_t* chunk_list){
-    for (int i = 0; i < chunk_list->used; i++){
-        Chunk* temp_chunk = (Chunk*)chunk_list->list[i].data;
+void destroy_chunk_list(std::vector<Chunk> chunk_list){
+    for (int i = 0; i < chunk_list.size(); i++){
+        Chunk* temp_chunk = &chunk_list.at(i);
         free(temp_chunk->blocks);
-        delete temp_chunk; 
     }
-    list_destroy(chunk_list);
 }

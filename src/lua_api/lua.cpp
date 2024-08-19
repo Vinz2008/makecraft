@@ -2,11 +2,18 @@
 #include "../makecraft.h"
 #include "../map/block.h"
 #include "../map/chunk.h"
+
+#ifdef __cplusplus
+extern "C" {            // Prevents name mangling of functions
+#endif
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#ifdef __cplusplus
+}
+#endif
 
-extern BlockArray* blockArray;
+extern std::vector<Block> blockArray;
 
 int lua_printTest(lua_State *L){
     FILE* fp2 = fopen("log2.txt", "w");
@@ -31,7 +38,7 @@ int lua_createBlock(lua_State *L){
     printf("x_block float : %f\n", x_block);
     printf("y_block float : %f\n", y_block);
     printf("z_block float : %f\n", z_block);
-    createBlock(blockArray, (float)x_block, (float)y_block, (float)z_block, dirt_texture);
+    drawBlock((float)x_block, (float)y_block, (float)z_block, dirt_texture);
     return 1;
 }
 
@@ -43,7 +50,7 @@ void runLuaFile(char* filename){
     lua_pushcfunction(L, lua_printTest);
     lua_setglobal(L, "makecraftPrintTest");
     lua_pushcfunction(L, lua_createBlock);
-    lua_setglobal(L, "createBlock");
+    lua_setglobal(L, "drawBlock");
     //lua_pushcfunction(L, lua_createChunk);
     //lua_setglobal(L, "createChunk");
     if (luaL_dofile(L, filename) == LUA_OK) {

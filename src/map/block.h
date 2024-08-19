@@ -1,11 +1,11 @@
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {            // Prevents name mangling of functions
-#endif
-
 #include "raylib.h"
 #include "raymath.h"
+
+#include <vector>
+
+#include "../makecraft.h"
 
 
 #define CUBE_SIZE 2.0f
@@ -25,25 +25,10 @@ typedef struct {
     float x;
     float y;
     float z;
-    int material;
+    enum material material;
 }Block;
 
-typedef struct {
-    Block* blockArray;
-    size_t used;
-    size_t size;
-} BlockArray;
 
-void initBlockArray(BlockArray* blockArray, size_t initalSize);
-void addToBlockArray(BlockArray* blockArray, Block block);
-void emptyBlockArray(BlockArray* blockArray);
-bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block);
-BlockArray* removeFromBlockArray(int index, BlockArray* blockArray);
-void destroyBlockArray(BlockArray* blockArray);
+bool isCubeNextToCube(std::vector<Block>& blockArray, int direction, Block block);
 
-/*Block**/ void createBlock(BlockArray* blockArray, float x, float y, float z, int texture);
-bool isCubeNextToCube(BlockArray* blockArray, int direction, Block block);
-
-#ifdef __cplusplus
-}
-#endif
+void drawBlock(float x, float y, float z, enum material texture);

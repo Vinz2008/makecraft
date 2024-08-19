@@ -61,10 +61,10 @@ Player player;
 
 
 
-BlockArray* blockArray;
+std::vector<Block> blockArray;
 // contain Chunk values that are loaded
 // TODO : will need not open the whole save file and lazy load it by having a way to calculate the place in the file where it will be
-list_t* chunkArray;
+std::vector<Chunk> chunkArray;
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
@@ -105,9 +105,9 @@ bool isPlayerInCollisionWithBlock(Player player, Block block){
 }
 
 
-bool isPlayerInCollisionWithArrayBlock(Player player, BlockArray* blockArray){
-    for (int i = 0; i < blockArray->used; i++) {
-        if (isPlayerInCollisionWithBlock(player, blockArray->blockArray[i])){
+bool isPlayerInCollisionWithArrayBlock(Player player, std::vector<Block>& blockArray){
+    for (int i = 0; i < blockArray.size(); i++) {
+        if (isPlayerInCollisionWithBlock(player, blockArray.at(i))){
             return true;
         }
     }
@@ -123,58 +123,49 @@ bool isPlayerOnTopOfBlock(Player player, Block block){
 }
 
 
-bool isPlayerOnTopOfBlockArray(Player player, BlockArray* blockArray){
-    for (int i = 0; i < blockArray->used; i++) {
-        if (isPlayerOnTopOfBlock(player, blockArray->blockArray[i]) && blockArray->blockArray[i].material != water_texture){
+bool isPlayerOnTopOfBlockArray(Player player, std::vector<Block>& blockArray){
+    for (int i = 0; i < blockArray.size(); i++) {
+        Block temp_block = blockArray.at(i);
+        if (isPlayerOnTopOfBlock(player, temp_block) && temp_block.material != water_texture){
             return true;
         }
     }
     return false;
 }
 
-bool isPlayerOnTopOfBlockOfWater(Player player, BlockArray* blockArray){
-    for (int i = 0; i < blockArray->used; i++) {
-        if (isPlayerOnTopOfBlock(player, blockArray->blockArray[i]) && blockArray->blockArray[i].material == water_texture){
+bool isPlayerOnTopOfBlockOfWater(Player player, std::vector<Block>& blockArray){
+    for (int i = 0; i < blockArray.size(); i++) {
+        Block temp_block = blockArray.at(i);
+        if (isPlayerOnTopOfBlock(player, temp_block) && temp_block.material == water_texture){
             return true;
         }
     }
     return false;
 }
-
-#ifdef PLATFORM_WEB
-float get_noise_data(std::vector<float>& noise, int x, int y, int size){
-
-}
-#endif
 
 //----------------------------------------------------------------------------------
 // Main entry point
 //----------------------------------------------------------------------------------
 int main(int argc, char* argv[]){
-#ifndef PLATFORM_WEB
     int seed = NOISE_SEED;
     float frequency = NOISE_FREQUENCY;
     std::vector<float> farray = generate_noise(NB_BLOCK_NOISE, seed, frequency, 0, 0);
     write_noise_to_file(farray, NB_BLOCK_NOISE, "noise.txt");
-#else
-    std::vector<float> farray;
-#endif
     player.camera.fovy = 0;
     if (access("blockArray.tpl", F_OK) == 0){
         blockArray = tpl_deserialize_block_array("blockArray.tpl");
     } else {
-        blockArray = (BlockArray*)malloc(sizeof(BlockArray));
-        initBlockArray(blockArray, NB_BLOCK_NOISE);
+        blockArray = {};
         for (int x = 0; x < NB_BLOCK_NOISE; x++){
             for (int z = 0; z < NB_BLOCK_NOISE; z++){
                 float y = round(get_noise_data(farray, x, z, NB_BLOCK_NOISE));
-                int texture = get_block_type(y);
-                addToBlockArray(blockArray, (Block){x*2.0f, y*2.0f, z*2.0f, texture});
+                enum material texture = get_block_type(y);
+                blockArray.push_back((Block){x*2.0f, y*2.0f, z*2.0f, texture});
             }
         }
         tpl_serialize_block_array(blockArray, "blockArray.tpl");
     }
-    printf("blockArraysize : %ld\n", blockArray->used);
+    printf("blockArraysize : %ld\n", blockArray.size());
     //chunkArray = get_new_perlin_chunk_list(); // TODO : fix the segmentation fault
     char* filename_lua = "script.lua";
     printf("filename_lua : %s\n", filename_lua);
@@ -188,13 +179,12 @@ int main(int argc, char* argv[]){
             }
         }
     }
-#ifndef PLATFORM_WEB
+
     printf("filename_lua : %s\n", filename_lua);
     if (access(filename_lua, F_OK) == 0){
         printf("run file lua : %s\n", filename_lua);
         runLuaFile(filename_lua);
     }
-#endif
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 1200;
@@ -227,9 +217,7 @@ int main(int argc, char* argv[]){
     float falling_speed = 0;
     //--------------------------------------------------------------------------------------
 
-#if 0
-    emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
-#else
+
     DisableCursor();
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -298,14 +286,14 @@ int main(int argc, char* argv[]){
         if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)){
             ray = GetMouseRay(GetMousePosition(), player.camera);
             Mesh MeshCube = GenMeshCube(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
-            for (int i = 0; i < blockArray->used; i++){
+            for (int i = 0; i < blockArray.size(); i++){
                 //printf("i : %d, used : %d, size : %d\n", i, blockArray->used, blockArray->size);
-                Block tempBlock = blockArray->blockArray[i];
+                Block tempBlock = blockArray.at(i);
                 RayCollision collision = GetRayCollisionMesh(ray, MeshCube, MatrixTranslate(tempBlock.x, tempBlock.y, tempBlock.z));
                 if (collision.hit){
                     printf("ray collide with cube\n");
                     //blockArray = removeFromBlockArray(i, blockArray); // TODO : readd this when the mouse pointing will work
-                    blockArray->blockArray[i].material = water_texture;
+                    blockArray.at(i).material = water_texture;
                 }
             }
         }
@@ -345,14 +333,14 @@ int main(int argc, char* argv[]){
                 for (float y = 0; y < NB_BLOCK_NOISE; y++){
                     float znoise = round(get_noise_data(farray, x, y, NB_BLOCK_NOISE));
                     if (znoise < 17){
-                    createWater(blockArray, x*2.0f, y*2.0f, znoise+0.1, 10);
+                    drawWater(blockArray, x*2.0f, y*2.0f, znoise+0.1, 10);
                     }
                 }
             }
 
-            for (int i = 0; i < blockArray->used; i++){
-                Block blocktemp = blockArray->blockArray[i];
-                createBlock(blockArray, blocktemp.x, blocktemp.y, blocktemp.z, blocktemp.material);
+            for (int i = 0; i < blockArray.size(); i++){
+                Block blocktemp = blockArray.at(i);
+                drawBlock(blocktemp.x, blocktemp.y, blocktemp.z, blocktemp.material);
             }
 
         EndMode3D();
@@ -391,12 +379,10 @@ int main(int argc, char* argv[]){
     GroundHitBox = (BoundingBox){(Vector3){ 0.0f, 0.0f, 0.0f }, (Vector3){ 0.0f + 32.0f, 0.0f + 32.0f, 0.0f } };
 
     }
-#endif
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
     tpl_serialize_block_array(blockArray, "blockArray.tpl");
-    destroyBlockArray(blockArray);
     UnloadCachedTextures();
     CloseWindow();                  // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
